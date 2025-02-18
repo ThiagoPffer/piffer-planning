@@ -1,1 +1,93 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
+
+:root{
+    --primaria: #79fe86;
+    --primaria-claro: #a0fda9;
+    --primaria-medio: #3dc14a;
+    --primaria-escuro: #198524;
+    --cinza-claro: #F5F5F5;
+    --cinza-medio: #8A8A8A;
+    --cinza-escuro: #464646;
+    --success: #0CA925;
+    --neutral: #002AC0;
+    --warning: #f8ea25;
+    --danger: #b60000;
+    --input-border: #d0d0d0
+}
+
+*{
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: none;
+    box-sizing: border-box;
+}
+
+html, 
+body,
+app-root {
+    position: relative;  
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+}
+
+body {
+    background-color: var(--primaria);
+}
+
+input {
+    padding: 15px;
+    font-size: .875rem;
+    font-weight: 300;
+    border: 1px solid var(--cinza-medio);
+    border-radius: 6px;
+    width: 100%;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: flex-start;
+    gap: 5px;
+}
+
+.main-section {
+    background-color: white;
+    height: 100%;
+    border-radius: 6px;
+    margin: 0 60px;
+}
+
+.main-section header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 30px 60px;
+}
+
+.main-section header h2 {
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.default-button {
+    font-size: 1rem;
+    font-weight: 500;
+    background: var(--primaria-medio);
+    color: white;
+    border: none;
+    padding: 15px;
+    margin-top: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: .3s;
+}
+
+.default-button:hover {
+    opacity: .8;
+}

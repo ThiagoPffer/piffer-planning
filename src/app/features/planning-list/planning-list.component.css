@@ -1,0 +1,21 @@
+.planning-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 0 60px;
+}
+
+.planning-list-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    list-style: none;
+    padding: 15px;
+    border: 2px solid var(--primaria-medio);
+    border-radius: 6px;
+}
+
+.planning-list-item:hover {
+    cursor: pointer;
+    background-color: var(--primaria-medio);
+}

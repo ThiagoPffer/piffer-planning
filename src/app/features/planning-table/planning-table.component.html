@@ -1,0 +1,31 @@
+<!-- Overlay do Modal -->
+<div class="modal-overlay" [ngClass]="{'show': showNameDialog}" id="modal">
+    <div class="modal">
+        <div class="input-group">
+            <label for="name-input">Digite seu nome</label>
+            <input type="text" id="name-input" [(ngModel)]="userName">
+        </div>
+        <button class="default-button" (click)="fecharModal()">Enviar</button>
+    </div>
+</div>
+<section class="main-section">
+    <header>
+        <h2>Nome da planning</h2>
+    </header>
+    <div class="voter-card-list">
+        <div class="voter-card-group">
+            <div class="voter-card">
+                {{ votedOption }}
+            </div>
+            <span class="voter-name">
+                {{ userName }}
+            </span>
+        </div>
+        <div class="voter-card-group" *ngFor="let voter of voters">
+            <div class="voter-card"></div>
+            <span class="voter-name">
+                {{ voter.name }}
+            </span>
+        </div>
+    </div>
+</section>
