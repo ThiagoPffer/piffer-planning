@@ -5,12 +5,8 @@ import { PlanningTableComponent } from './features/planning-table/planning-table
 export const routes: Routes = [
     {
         path: '',
-        redirectTo: 'planning-list',
+        component: PlanningListComponent,
         pathMatch: 'full'
-    },
-    {
-        path: 'planning-list',
-        component: PlanningListComponent
     },
     {
         path: 'planning-table',
