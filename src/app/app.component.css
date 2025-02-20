@@ -2,6 +2,7 @@ header,
 footer {
     padding: 25px 60px;
     text-align: center;
+    color: var(--primaria);
 }
 
 header h1 {

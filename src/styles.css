@@ -1,10 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
 
 :root{
-    --primaria: #79fe86;
-    --primaria-claro: #a0fda9;
-    --primaria-medio: #3dc14a;
-    --primaria-escuro: #198524;
+    --primaria: #3d76fb;
+    --primaria-claro: #88aaf8;
+    --primaria-medio: #6491fa;
+    --primaria-escuro: #2262f8;
     --cinza-claro: #F5F5F5;
     --cinza-medio: #8A8A8A;
     --cinza-escuro: #464646;
@@ -28,14 +28,20 @@ html,
 body,
 app-root {
     position: relative;  
-    height: 100%;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     margin: 0;
+    overflow-x: hidden;
 }
 
-body {
-    background-color: var(--primaria);
+body,
+app-root,
+app-planning-table,
+app-planning-list {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
 }
 
 input {
@@ -45,6 +51,11 @@ input {
     border: 1px solid var(--cinza-medio);
     border-radius: 6px;
     width: 100%;
+    transition: .2s;
+}
+
+input:focus {
+    border: 1px solid var(--primaria);
 }
 
 .input-group {
@@ -53,13 +64,13 @@ input {
     align-items: start;
     justify-content: flex-start;
     gap: 5px;
+    width: 100%;
 }
 
 .main-section {
     background-color: white;
-    height: 100%;
+    flex: 1;
     border-radius: 6px;
-    margin: 0 60px;
 }
 
 .main-section header {
@@ -86,6 +97,7 @@ input {
     cursor: pointer;
     border-radius: 5px;
     transition: .3s;
+    width: 100%;
 }
 
 .default-button:hover {

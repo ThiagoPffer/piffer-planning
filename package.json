@@ -18,6 +18,7 @@
     "@angular/platform-browser": "^17.2.0",
     "@angular/platform-browser-dynamic": "^17.2.0",
     "@angular/router": "^17.2.0",
+    "@mdi/font": "^7.4.47",
     "firebase": "^11.3.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
