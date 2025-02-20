@@ -15,7 +15,7 @@
     <div class="board">
         <header>
             <div class="header-title">
-                <a href class="mdi mdi-arrow-left" [routerLink]="['/planning-list']" routerLinkActive="router-link-active"></a>
+                <a href class="mdi mdi-arrow-left" [routerLink]="['../']" routerLinkActive="router-link-active"></a>
                 <h2>{{ planningName }}</h2>
             </div>
             <span *ngIf="voters.length">Votantes: {{ voters.length }}</span>
@@ -30,7 +30,7 @@
             <voter-card [voter]="voter" [votingFinished]="!!currentIssue?.averageVoting" *ngFor="let voter of voters"/>
         </div>
         <footer>
-            <div class="option-card-list" *ngIf="currentIssue?.status === 'Votando'">
+            <div class="option-card-list" *ngIf="!user.observer && currentIssue?.status === 'Votando'">
                 <div class="option-card" 
                     [ngClass]="{'selected': votedOption === option}"
                     *ngFor="let option of options" 

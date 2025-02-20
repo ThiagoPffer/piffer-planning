@@ -116,11 +116,16 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   public resetVotes(issue: string | null) {
     update(ref(this.database, 'plannings/teste-chave-aleatoria/'), {
       issue,
-      voters: this.voters.reduce((v: any, voter: any) => {
+      voters: this.voters.reduce((v: any, voter: Voter) => {
         voter.votedOption = null;
         v[voter.uid] = voter;
         return v;
-      }, {})
+      }, {
+        ...this.observers.reduce((o: any, observer: User) => {
+          o[observer.uid] = observer
+          return o;
+        }, {})
+      })
     });
   }
 
@@ -145,7 +150,7 @@ export interface User {
 }
 
 export interface Voter extends User {
-  votedOption?: string
+  votedOption?: string | null
 }
 
 export interface Planning {
