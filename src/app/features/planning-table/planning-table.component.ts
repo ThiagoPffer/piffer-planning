@@ -101,8 +101,6 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
       this.votedOption = this.voters.find((v: any) => v.uid === this.user.uid).votedOption;
       this.currentIssue = data.issue ? (await getDoc(doc(this.firestore, 'issues', data.issue))).data() : null;
 
-      console.log('onValue', data);
-
       if (this.voters.every((v: any) => v.votedOption) && !this.currentIssue?.averageVoting) {
         this.finishVoting();
       }
@@ -143,7 +141,6 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
     onSnapshot(query(collection(this.firestore, 'issues'), where('planningId', '==', 'teste-chave-aleatoria')), snap => {
       this.issues = snap.docs.map(doc => doc.data());
       this.currentIssue = this.issues.find(i => i.id === this.currentIssue?.id);
-      console.log('loadIssues', this.issues);
     });
   }
 
