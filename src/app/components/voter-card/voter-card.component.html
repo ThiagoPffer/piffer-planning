@@ -1,0 +1,10 @@
+<div class="voter-card-group">
+    <div 
+        class="voter-card" 
+        [@cardTurn]="voter.votedOption && !votingFinished ? 'back' : 'front'">
+        <span *ngIf="votingFinished">{{ voter.votedOption }}</span>
+    </div>
+    <span class="voter-name">
+        {{ voter.name }}
+    </span>
+</div>

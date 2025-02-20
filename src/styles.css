@@ -103,3 +103,19 @@ input:focus {
 .default-button:hover {
     opacity: .8;
 }
+
+.icon-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 1.2rem;
+    transition: .2s;
+    background-color: transparent;
+}
+
+.icon-button:hover {
+    background-color: rgb(228, 228, 228);
+    cursor: pointer;
+}

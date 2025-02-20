@@ -7,6 +7,8 @@ import { initializeApp } from 'firebase/app';
 import { getDatabase, onValue, ref, set, update } from 'firebase/database';
 import { addDoc, collection, doc, getDoc, getFirestore, onSnapshot, query, setDoc, updateDoc, where } from "firebase/firestore";
 import { environment } from '../../../environments/environment';
+import { InfoPanelComponent } from "../../components/info-panel/info-panel.component";
+import { VoterCardComponent } from "../../components/voter-card/voter-card.component";
 
 
 @Component({
@@ -16,56 +18,12 @@ import { environment } from '../../../environments/environment';
     CommonModule,
     FormsModule,
     RouterModule,
-    ReactiveFormsModule
-  ],
+    ReactiveFormsModule,
+    InfoPanelComponent,
+    VoterCardComponent
+],
   templateUrl: './planning-table.component.html',
-  styleUrl: './planning-table.component.css',
-  animations: [
-    trigger('newIssueAppear', [
-      state('closed', style({
-        display: 'none',
-        width: '0',
-        opacity: '0',
-        margin: '0',
-        padding: '0'
-      })),
-      state('opened', style({
-        display: 'block',
-        width: '25%',
-        opacity: '1'
-      })),
-      transition('closed => opened', [
-        animate('.3s ease-out')
-      ]),
-      transition('opened => closed', [
-        animate('.3s ease-out', style({
-          margin: 0,
-          width: 0,
-          opacity: 0,
-          padding: 0,
-          transform: 'translateY(50px)'
-        }))
-      ])
-    ]),
-    trigger('cardTurn', [
-      state('front', style({
-        backgroundColor: 'white',
-        border: '2px solid var(--cinza-medio)',
-        transform: 'rotate3d(0, 1, 0, 0)'
-      })),
-      state('back', style({
-        backgroundColor: 'var(--primaria)',
-        border: '2px solid var(--primaria)',
-        transform: 'rotate3d(0, 1, 0, 3.14rad)'
-      })),
-      transition('back => front', [
-        animate('.2s', style({
-          backgroundColor: 'white',
-          transform: 'rotate3d(0, 1, 0, 0)'
-        }))
-      ])
-    ])
-  ]
+  styleUrl: './planning-table.component.css'
 })
 export class PlanningTableComponent implements OnInit, OnDestroy {
 
@@ -74,26 +32,19 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   public firestore = getFirestore(this.app);
   public dbRef = ref(this.database, 'plannings/teste-chave-aleatoria/');
 
-
-  public isAddingNewIssue: boolean = false;
-  public addNewIssueFormGroup!: FormGroup;
   public planningName!: string;
   public showNameDialog: boolean = false;
   public userName!: string;
   public user!: Voter;
   public votedOption: string | null = null;
-  public voters!: Voter[];
-  public issues!: Issue[];
+  public voters: Voter[] = [];
   public currentIssue!: Issue | null;
   public options: string[] = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "☕"];
 
-  constructor(
-    private formBuilder: FormBuilder
-  ) {}
+  constructor() {}
 
   ngOnInit(): void {
     this.loadUserData();
-    this.loadIssues();
     onValue(this.dbRef, async (snapshot) => {
       const data = snapshot.val() as Planning;
       this.planningName = data.name;
@@ -135,11 +86,8 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
     update(ref(this.database, 'plannings/teste-chave-aleatoria/voters/' + this.user.uid), {...userData, online: true});
   }
 
-  public loadIssues() {
-    onSnapshot(query(collection(this.firestore, 'issues'), where('planningId', '==', 'teste-chave-aleatoria')), snap => {
-      this.issues = snap.docs.map(doc => doc.data() as Issue);
-      this.currentIssue = this.issues.find(i => i.id === this.currentIssue?.id) || null;
-    });
+  public onIssuesLoaded(issues: Issue[]) {
+      this.currentIssue = issues.find(i => i.id === this.currentIssue?.id) || null;
   }
 
   public saveUser() {
@@ -156,7 +104,7 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
     set(ref(this.database, 'plannings/teste-chave-aleatoria/voters/' + this.user.uid + '/votedOption'), option);
   }
 
-  public onReset(issue: any) {
+  public onReset(issue: Issue) {
     this.votedOption = null;
     this.resetVotes(null);
     updateDoc(doc(this.firestore, 'issues', issue.id), { status: EnumIssueStatus.VOTAR, averageVoting: null });
@@ -173,32 +121,10 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
     });
   }
 
-  public onStartVoting(issue: any) {
+  public onStartVoting(issue: Issue) {
     this.votedOption = null;
     this.resetVotes(issue.id);
     updateDoc(doc(this.firestore, 'issues', issue.id), { status: EnumIssueStatus.VOTANDO });
-  }
-
-  public onAddNewIssue() {
-    this.isAddingNewIssue = !this.isAddingNewIssue;
-    this.addNewIssueFormGroup = this.formBuilder.group({
-      description: ['', Validators.required],
-      url: ['', Validators.required],
-    })
-  }
-
-  public async onSaveNewIssue() {
-    if (this.addNewIssueFormGroup.valid) {
-      const newIssue = {
-        ...this.addNewIssueFormGroup.getRawValue(),
-        planningId: 'teste-chave-aleatoria',
-        status: EnumIssueStatus.VOTAR
-      }
-      this.addNewIssueFormGroup.reset();
-      this.onAddNewIssue();
-      const newIssueRef = doc(collection(this.firestore, 'issues'));
-      await setDoc(newIssueRef, {...newIssue, id: newIssueRef.id});
-    }
   }
 
   private calculateAverage(numbers: number[]) {
@@ -208,21 +134,21 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   }
 }
 
-interface Voter {
+export interface Voter {
   uid: string
   name: string
   votedOption?: string
   online?: boolean
 }
 
-interface Planning {
+export interface Planning {
   id?: string
   name: string
   issue: string
   voters: Voter[]
 }
 
-interface Issue {
+export interface Issue {
   id: string
   description: string
   averageVoting?: number
@@ -231,7 +157,7 @@ interface Issue {
   url: string
 }
 
-enum EnumIssueStatus {
+export enum EnumIssueStatus {
   VOTANDO = 'Votando', 
   VOTAR = 'Votar',
   FINALIZADO = 'Finalizado',

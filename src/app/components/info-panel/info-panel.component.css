@@ -1,0 +1,109 @@
+::-webkit-scrollbar {
+    width: 5px;
+}
+  
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+  
+::-webkit-scrollbar-thumb {
+    background: var(--primaria-claro);
+    border-radius: 50px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primaria);
+}
+
+.info {
+    display: flex;
+    flex-direction: column;
+    min-width: 300px;
+    flex: 1;
+    background-color: rgb(248, 248, 248);
+    border-radius: 6px;
+    padding: 0 30px 15px 30px;
+    margin-right: 30px;
+    transition: .2s;
+    overflow: hidden;
+}
+
+.info header {
+    padding: 30px 0;
+}
+
+.info-issue-list {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 15px;
+    padding: 0;
+    overflow: auto;
+    max-height: 450px;
+}
+
+.info-issue-list-item {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    text-decoration: none;
+    list-style: none;
+    padding: 15px;
+    border-radius: 6px;
+    background-color: white;
+}
+
+.info-issue-list-item h4 {
+    font-weight: 500;
+}
+
+.info-issue-list-item:hover {
+    background-color: #f1f1f1;
+    border: 2px solid #f1f1f1 !important;
+}
+
+.issue-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 15px;
+    border-radius: 6px;
+    font-size: .875rem;
+    background-color: var(--primaria-claro);
+    width: fit-content;
+}
+
+.average-badge {
+    background-color: rgb(224, 224, 255);
+    padding: 5px 10px;
+    border-radius: 6px;
+    transition: .2s;
+}
+
+.vote-button {
+    padding: 5px 15px;
+    background-color: rgb(224, 224, 255);
+    color: black;
+    border-radius: 6px;
+    font-size: .875rem;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.vote-button:hover {
+    background-color: var(--primaria-claro);
+}
+
+.new-issue {
+    min-width: 300px;
+    background-color: white;
+    border-radius: 6px;
+    padding: 0 15px;
+    margin-right: 30px;
+    transition: .2s;
+}
+
+.new-issue header {
+    padding: 30px 0;
+}

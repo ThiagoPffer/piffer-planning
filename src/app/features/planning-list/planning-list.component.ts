@@ -15,7 +15,6 @@ export class PlanningListComponent {
   ){}
 
   public onClickPlanning() {
-    console.log('teste');
     this.router.navigateByUrl('planning-table');
   }
 

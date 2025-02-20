@@ -1,0 +1,57 @@
+<div class="info">
+    <header>
+        <h2>Issues</h2>
+        <button type="button" class="icon-button" (click)="onAddNewIssue()">
+            <span class="mdi" [ngClass]="{
+                'mdi-plus': !isAddingNewIssue,
+                'mdi-chevron-right': isAddingNewIssue
+            }"></span>
+        </button>
+    </header>
+    <div class="info-issue-list">
+        <div class="info-issue-list-item" *ngFor="let issue of issues" [ngStyle]="{'border': issue.status === 'Votando' ? '2px solid var(--primaria)' : '2px solid white'}">
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <div>
+                    <h4>{{ issue.description }}</h4>
+                    <a [href]="issue.url" target="_blank">Issue link</a>
+                </div>
+                <div style="display: flex; flex-direction: row; gap: 10px;">
+                    <span class="issue-badge" *ngIf="issue.status !== 'Votar'">{{ issue.status }}</span>
+                    <button 
+                        type="button" 
+                        class="vote-button" 
+                        (click)="onStartVoting(issue)" 
+                        *ngIf="issue.status === 'Votar'"
+                        [disabled]="currentIssue?.status === 'Votando'"
+                    >
+                        Votar
+                    </button>
+                    <button type="button" class="icon-button" (click)="onReset(issue)" *ngIf="issue.status !== 'Votar'">
+                        <span class="mdi mdi-refresh"></span>
+                    </button>
+                </div>
+            </div>
+            <span class="average-badge" *ngIf="issue.averageVoting">{{ issue.averageVoting }}</span>
+        </div>
+    </div>
+</div>
+<div class="new-issue" [@newIssueAppear]="isAddingNewIssue ? 'opened' : 'closed'">
+    <header>
+        <h2>Nova issue</h2>
+    </header>
+    <div 
+        style="display: flex; flex-direction: column; gap: 15px;" 
+        [formGroup]="addNewIssueFormGroup"
+        *ngIf="isAddingNewIssue"
+    >
+        <div class="input-group">
+            <label for="issue-desc-input">Descrição da issue</label>
+            <input type="text" id="issue-desc-input" formControlName="description">
+        </div>
+        <div class="input-group">
+            <label for="issue-link-input">Link da issue</label>
+            <input type="text" id="issue-link-input" formControlName="url">
+        </div>
+        <button class="default-button" (click)="onSaveNewIssue()">Salvar</button>
+    </div>
+</div>
