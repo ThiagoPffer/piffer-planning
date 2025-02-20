@@ -4,6 +4,10 @@
             <label for="name-input">Digite seu nome</label>
             <input type="text" id="name-input" [(ngModel)]="userName">
         </div>
+        <div class="checkbox-group">
+            <label for="observer-check">Observador</label>
+            <input type="checkbox" id="observer-check" [(ngModel)]="isObserver">
+        </div>
         <button class="default-button" (click)="saveUser()">Enviar</button>
     </div>
 </div>
@@ -16,6 +20,12 @@
             </div>
             <span *ngIf="voters.length">Votantes: {{ voters.length }}</span>
         </header>
+        <div class="observer-card-list" *ngIf="observers.length">
+            <div class="observer-card" *ngFor="let observer of observers">
+                <span>{{ observer.name }}</span>
+                <span class="mdi mdi-eye-outline"></span>
+            </div>
+        </div>
         <div class="voter-card-list">
             <voter-card [voter]="voter" [votingFinished]="!!currentIssue?.averageVoting" *ngFor="let voter of voters"/>
         </div>

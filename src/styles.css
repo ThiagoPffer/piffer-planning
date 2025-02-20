@@ -67,6 +67,27 @@ input:focus {
     width: 100%;
 }
 
+.checkbox-group {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 15px;
+    width: 100%;
+}
+
+.checkbox-group > input {
+    width: 18px;
+    height: 18px;
+    
+}
+
+.checkbox-group > input:hover,
+.checkbox-group > label:hover {
+    cursor: pointer;
+}
+
 .main-section {
     background-color: white;
     flex: 1;

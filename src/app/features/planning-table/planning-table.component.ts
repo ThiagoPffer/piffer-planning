@@ -35,9 +35,11 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   public planningName!: string;
   public showNameDialog: boolean = false;
   public userName!: string;
+  public isObserver: boolean = false;
   public user!: Voter;
   public votedOption: string | null = null;
   public voters: Voter[] = [];
+  public observers: User[] = [];
   public currentIssue!: Issue | null;
   public options: string[] = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "☕"];
 
@@ -48,7 +50,8 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
     onValue(this.dbRef, async (snapshot) => {
       const data = snapshot.val() as Planning;
       this.planningName = data.name;
-      this.voters = Object.values(data.voters).filter(v => v.online);
+      this.voters = Object.values(data.voters).filter(u => u.online && !u.observer);
+      this.observers = Object.values(data.voters).filter(u => u.online && u.observer);
       this.votedOption = this.voters.find(v => v.uid === this.user.uid)?.votedOption || null;
       this.currentIssue = data.issue ? (await getDoc(doc(this.firestore, 'issues', data.issue))).data() as Issue : null;
 
@@ -92,7 +95,7 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
 
   public saveUser() {
     if (this.userName) {
-      this.user = { name: this.userName, uid: crypto.randomUUID() };
+      this.user = { name: this.userName, uid: crypto.randomUUID(), observer: this.isObserver };
       set(ref(this.database, 'plannings/teste-chave-aleatoria/voters/' + this.user.uid), {...this.user, online: true});
       localStorage.setItem('userData', JSON.stringify(this.user));
       this.showNameDialog = false;
@@ -134,18 +137,22 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   }
 }
 
-export interface Voter {
+export interface User {
   uid: string
   name: string
-  votedOption?: string
   online?: boolean
+  observer?: boolean
+}
+
+export interface Voter extends User {
+  votedOption?: string
 }
 
 export interface Planning {
   id?: string
   name: string
   issue: string
-  voters: Voter[]
+  voters: User[]
 }
 
 export interface Issue {
