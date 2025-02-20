@@ -80,11 +80,11 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   public planningName!: string;
   public showNameDialog: boolean = false;
   public userName!: string;
-  public user!: UserData;
+  public user!: Voter;
   public votedOption: string | null = null;
-  public voters!: any;
-  public issues!: any[];
-  public currentIssue!: any;
+  public voters!: Voter[];
+  public issues!: Issue[];
+  public currentIssue!: Issue | null;
   public options: string[] = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "☕"];
 
   constructor(
@@ -95,13 +95,13 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
     this.loadUserData();
     this.loadIssues();
     onValue(this.dbRef, async (snapshot) => {
-      const data = snapshot.val();
+      const data = snapshot.val() as Planning;
       this.planningName = data.name;
-      this.voters = Object.values(data.voters).filter((v: any) => v.online);
-      this.votedOption = this.voters.find((v: any) => v.uid === this.user.uid).votedOption;
-      this.currentIssue = data.issue ? (await getDoc(doc(this.firestore, 'issues', data.issue))).data() : null;
+      this.voters = Object.values(data.voters).filter(v => v.online);
+      this.votedOption = this.voters.find(v => v.uid === this.user.uid)?.votedOption || null;
+      this.currentIssue = data.issue ? (await getDoc(doc(this.firestore, 'issues', data.issue))).data() as Issue : null;
 
-      if (this.voters.every((v: any) => v.votedOption) && !this.currentIssue?.averageVoting) {
+      if (this.voters.every(v => v.votedOption) && !this.currentIssue?.averageVoting) {
         this.finishVoting();
       }
     });
@@ -109,26 +109,24 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.user?.uid) {
-      update(ref(this.database, 'plannings/teste-chave-aleatoria/voters/' + this.user.uid), {
-        online: false
-      });
+      update(ref(this.database, 'plannings/teste-chave-aleatoria/voters/' + this.user.uid), { online: false });
     }
   }
 
   private finishVoting() {
     this.votedOption = null;
-    const votes = this.voters.map((v: any) => {
+    const votes = this.voters.map(v => {
       if (v.votedOption && !Number.isNaN(Number(v.votedOption))) {
         return Number(v.votedOption);
       }
       return 0;
     });
     const avgVoting = this.calculateAverage(votes);
-    updateDoc(doc(this.firestore, 'issues', this.currentIssue.id), { status : 'Finalizado', averageVoting: avgVoting });
+    updateDoc(doc(this.firestore, 'issues', this.currentIssue?.id as string), { status : EnumIssueStatus.FINALIZADO, averageVoting: avgVoting });
   }
 
   public loadUserData() {
-    var userData = JSON.parse(localStorage.getItem('userData') as string) as UserData;
+    var userData = JSON.parse(localStorage.getItem('userData') as string) as Voter;
     if (!userData) {
       this.showNameDialog = true;
       return;
@@ -139,17 +137,15 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
 
   public loadIssues() {
     onSnapshot(query(collection(this.firestore, 'issues'), where('planningId', '==', 'teste-chave-aleatoria')), snap => {
-      this.issues = snap.docs.map(doc => doc.data());
-      this.currentIssue = this.issues.find(i => i.id === this.currentIssue?.id);
+      this.issues = snap.docs.map(doc => doc.data() as Issue);
+      this.currentIssue = this.issues.find(i => i.id === this.currentIssue?.id) || null;
     });
   }
 
   public saveUser() {
     if (this.userName) {
       this.user = { name: this.userName, uid: crypto.randomUUID() };
-
       set(ref(this.database, 'plannings/teste-chave-aleatoria/voters/' + this.user.uid), {...this.user, online: true});
-
       localStorage.setItem('userData', JSON.stringify(this.user));
       this.showNameDialog = false;
     }
@@ -163,7 +159,7 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   public onReset(issue: any) {
     this.votedOption = null;
     this.resetVotes(null);
-    updateDoc(doc(this.firestore, 'issues', issue.id), { status: 'Votar', averageVoting: null });
+    updateDoc(doc(this.firestore, 'issues', issue.id), { status: EnumIssueStatus.VOTAR, averageVoting: null });
   }
 
   public resetVotes(issue: string | null) {
@@ -180,7 +176,7 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   public onStartVoting(issue: any) {
     this.votedOption = null;
     this.resetVotes(issue.id);
-    updateDoc(doc(this.firestore, 'issues', issue.id), { status: 'Votando' });
+    updateDoc(doc(this.firestore, 'issues', issue.id), { status: EnumIssueStatus.VOTANDO });
   }
 
   public onAddNewIssue() {
@@ -196,7 +192,7 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
       const newIssue = {
         ...this.addNewIssueFormGroup.getRawValue(),
         planningId: 'teste-chave-aleatoria',
-        status: 'Votar'
+        status: EnumIssueStatus.VOTAR
       }
       this.addNewIssueFormGroup.reset();
       this.onAddNewIssue();
@@ -212,8 +208,31 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   }
 }
 
-interface UserData {
-  name: string
+interface Voter {
   uid: string
-  votedOption?: boolean
+  name: string
+  votedOption?: string
+  online?: boolean
+}
+
+interface Planning {
+  id?: string
+  name: string
+  issue: string
+  voters: Voter[]
+}
+
+interface Issue {
+  id: string
+  description: string
+  averageVoting?: number
+  planningId: string
+  status: EnumIssueStatus
+  url: string
+}
+
+enum EnumIssueStatus {
+  VOTANDO = 'Votando', 
+  VOTAR = 'Votar',
+  FINALIZADO = 'Finalizado',
 }
