@@ -4,7 +4,7 @@
     "indexes": "firestore.indexes.json"
   },
   "hosting": {
-    "public": "dist/piffer-planning",
+    "public": "dist/piffer-planning/browser",
     "ignore": [
       "firebase.json",
       "**/.*",
