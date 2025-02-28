@@ -27,10 +27,17 @@
             </div>
         </div>
         <div class="voter-card-list">
-            <voter-card [voter]="voter" [votingFinished]="!!currentIssue?.averageVoting" *ngFor="let voter of voters"/>
+            <voter-card 
+                id="{{voter.uid}}"
+                [voter]="voter" 
+                [votingFinished]="!!currentIssue?.averageVoting"
+                (onPoke)="onPoke($event)"
+                #voterCardList 
+                *ngFor="let voter of voters"
+            />
         </div>
         <footer>
-            <div class="option-card-list" *ngIf="!user.observer && currentIssue?.status === 'Votando'">
+            <div class="option-card-list" *ngIf="!user?.observer && currentIssue?.status === 'Votando'">
                 <div class="option-card" 
                     [ngClass]="{'selected': votedOption === option}"
                     *ngFor="let option of options" 

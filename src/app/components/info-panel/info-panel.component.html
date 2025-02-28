@@ -24,7 +24,7 @@
                         *ngIf="issue.status === 'Votar'"
                         [disabled]="currentIssue?.status === 'Votando'"
                     >
-                        Votar
+                        Iniciar votação
                     </button>
                     <button type="button" class="icon-button" (click)="onReset(issue)" *ngIf="issue.status !== 'Votar'">
                         <span class="mdi mdi-refresh"></span>

@@ -1,7 +1,7 @@
-import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
-import { Voter } from '../../features/planning-table/planning-table.component';
 import { animate, state, style, transition, trigger } from '@angular/animations';
+import { CommonModule } from '@angular/common';
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { Voter } from '../../features/planning-table/planning-table.component';
 
 @Component({
   selector: 'voter-card',
@@ -36,5 +36,11 @@ export class VoterCardComponent {
 
   @Input() public votingFinished: boolean = false;
   @Input() public voter!: Voter;
+  @Output('onPoke') public onPokeEmmiter: EventEmitter<string> = new EventEmitter();
+  @ViewChild('cardElement', { static: true }) cardElement!: ElementRef;
+
+  public onPoke() {
+    this.onPokeEmmiter.emit(this.voter.uid);
+  }
 
 }

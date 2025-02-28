@@ -1,13 +1,13 @@
-import { animate, state, style, transition, trigger } from '@angular/animations';
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, ElementRef, OnDestroy, OnInit, QueryList, ViewChildren, ViewContainerRef } from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { initializeApp } from 'firebase/app';
-import { getDatabase, onValue, ref, set, update } from 'firebase/database';
-import { addDoc, collection, doc, getDoc, getFirestore, onSnapshot, query, setDoc, updateDoc, where } from "firebase/firestore";
+import { get, getDatabase, onValue, ref, set, update } from 'firebase/database';
+import { doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
 import { environment } from '../../../environments/environment';
 import { InfoPanelComponent } from "../../components/info-panel/info-panel.component";
+import { EmojiComponent } from "../../components/voter-card/emoji/emoji.component";
 import { VoterCardComponent } from "../../components/voter-card/voter-card.component";
 
 
@@ -40,25 +40,73 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   public votedOption: string | null = null;
   public voters: Voter[] = [];
   public observers: User[] = [];
+  public pokeList: {id: string, position: number}[] = [];
   public currentIssue!: Issue | null;
   public options: string[] = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "☕"];
+  public pokeControl: { [key: string]: { count: string, unsubscribe: any } } = {};
+  @ViewChildren('voterCardList') voterCardList!: QueryList<VoterCardComponent>;
 
-  constructor() {}
+  constructor(
+    private viewContainerRef: ViewContainerRef
+  ) {}
 
   ngOnInit(): void {
     this.loadUserData();
-    onValue(this.dbRef, async (snapshot) => {
-      const data = snapshot.val() as Planning;
-      this.planningName = data.name;
-      this.voters = Object.values(data.voters).filter(u => u.online && !u.observer);
-      this.observers = Object.values(data.voters).filter(u => u.online && u.observer);
-      this.votedOption = this.voters.find(v => v.uid === this.user.uid)?.votedOption || null;
-      this.currentIssue = data.issue ? (await getDoc(doc(this.firestore, 'issues', data.issue))).data() as Issue : null;
+    this.loadPlanningData();
+    this.setVotersListener();
+    this.setCurrentIssueListener();
+  }
+
+  loadPlanningData() {
+    get(ref(this.database, 'plannings/teste-chave-aleatoria/name')).then(snapshot => {
+      if (snapshot.exists()) {
+        this.planningName = snapshot.val() as string;
+      }
+    });
+  }
+
+  setVotersListener() {
+    onValue(ref(this.database, 'plannings/teste-chave-aleatoria/voters/'), snapshot => {
+      const users = Object.values(snapshot.val()) as User[];
+      this.voters = users.filter((u: any) => u.online && !u.observer) as Voter[];
+      this.observers = users.filter((u: any) => u.online && u.observer) as User[];
 
       if (this.voters.every(v => v.votedOption) && !this.currentIssue?.averageVoting) {
         this.finishVoting();
       }
+
+      this.voters.forEach(v => {
+        if (v.online) {
+          this.setPokesListener(v);
+        }
+        if (!v.online && this.pokeControl[v.uid]?.unsubscribe) {
+          this.pokeControl[v.uid]?.unsubscribe();
+        }
+      });
     });
+  }
+
+  setPokesListener(voter: Voter) {
+    if (!this.pokeControl[voter.uid]) {
+      this.pokeControl[voter.uid] = {} as { count: string, unsubscribe: any };
+    }
+
+    this.pokeControl[voter.uid].unsubscribe = onValue(ref(this.database, 'plannings/teste-chave-aleatoria/pokes/'+voter.uid), snapshot => {
+      const poke = snapshot.val() as any;
+
+      if (this.pokeControl[voter.uid].count !== poke?.count) {
+        this.poked(voter.uid, poke);
+      }
+
+      this.pokeControl[voter.uid].count = poke?.count || '0';
+    });
+  }
+
+  setCurrentIssueListener() {
+    onValue(ref(this.database, 'plannings/teste-chave-aleatoria/issue'), async snapshot => {
+      const issueId = snapshot.val() as string;
+      this.currentIssue = issueId ? (await getDoc(doc(this.firestore, 'issues', issueId))).data() as Issue : null;
+    })
   }
 
   ngOnDestroy(): void {
@@ -68,15 +116,17 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   }
 
   private finishVoting() {
-    this.votedOption = null;
-    const votes = this.voters.map(v => {
-      if (v.votedOption && !Number.isNaN(Number(v.votedOption))) {
-        return Number(v.votedOption);
-      }
-      return 0;
-    });
-    const avgVoting = this.calculateAverage(votes);
-    updateDoc(doc(this.firestore, 'issues', this.currentIssue?.id as string), { status : EnumIssueStatus.FINALIZADO, averageVoting: avgVoting });
+    if (this.currentIssue) {
+      this.votedOption = null;
+      const votes = this.voters.map(v => {
+        if (v.votedOption && !Number.isNaN(Number(v.votedOption))) {
+          return Number(v.votedOption);
+        }
+        return 0;
+      });
+      const avgVoting = this.calculateAverage(votes);
+      updateDoc(doc(this.firestore, 'issues', this.currentIssue.id as string), { status : EnumIssueStatus.FINALIZADO, averageVoting: avgVoting });
+    }
   }
 
   public loadUserData() {
@@ -90,7 +140,7 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   }
 
   public onIssuesLoaded(issues: Issue[]) {
-      this.currentIssue = issues.find(i => i.id === this.currentIssue?.id) || null;
+    this.currentIssue = issues.find(i => i.id === this.currentIssue?.id) || null;
   }
 
   public saveUser() {
@@ -140,6 +190,30 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
     const sum = numbers.reduce((acc, num) => acc + num, 0);
     return Math.round(sum / numbers.filter(n => n !== 0).length);
   }
+
+  public onPoke(voterId: string) {
+    if (voterId !== this.user.uid) {
+      set(ref(this.database, 'plannings/teste-chave-aleatoria/pokes/' + voterId + '/'), {
+        count: Math.random().toFixed(5),
+        emoji: '💩'
+      });
+    }
+  }
+
+  public poked(voterId: string, poke: any) {
+    const voterCard = this.voterCardList.toArray().find(c => c.voter.uid === voterId);
+    const voterCardPosition = voterCard?.cardElement.nativeElement.getBoundingClientRect();
+    if (voterCardPosition) {
+      const component = this.viewContainerRef.createComponent(EmojiComponent);
+      component.setInput('initialTop', 0);
+      component.setInput('initialLeft', ((Number(poke.count)*100000) % 2 === 0 ? 0 : window.screen.width));
+      component.setInput('hitTop', voterCardPosition.top-30);
+      component.setInput('hitLeft', voterCardPosition.left+25);
+      component.setInput('finalLeft', voterCardPosition.left+Math.round(Math.random()*100));
+      component.setInput('emoji', poke.emoji);
+      setTimeout(() => component.destroy(), 2400);
+    }
+  }
 }
 
 export interface User {
@@ -151,6 +225,7 @@ export interface User {
 
 export interface Voter extends User {
   votedOption?: string | null
+  pokedBy?: any
 }
 
 export interface Planning {
