@@ -89,17 +89,16 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   setPokesListener(voter: Voter) {
     if (!this.pokeControl[voter.uid]) {
       this.pokeControl[voter.uid] = {} as { count: string, unsubscribe: any };
+      this.pokeControl[voter.uid].unsubscribe = onValue(ref(this.database, 'plannings/teste-chave-aleatoria/pokes/'+voter.uid), snapshot => {
+        const poke = snapshot.val() as any;
+  
+        if (this.pokeControl[voter.uid].count !== poke?.count) {
+          this.poked(voter.uid, poke);
+        }
+  
+        this.pokeControl[voter.uid].count = poke?.count || '0';
+      });
     }
-
-    this.pokeControl[voter.uid].unsubscribe = onValue(ref(this.database, 'plannings/teste-chave-aleatoria/pokes/'+voter.uid), snapshot => {
-      const poke = snapshot.val() as any;
-
-      if (this.pokeControl[voter.uid].count !== poke?.count) {
-        this.poked(voter.uid, poke);
-      }
-
-      this.pokeControl[voter.uid].count = poke?.count || '0';
-    });
   }
 
   setCurrentIssueListener() {
