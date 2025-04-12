@@ -3,7 +3,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormGroup, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { EnumIssueStatus, Issue } from '../../features/planning-table/planning-table.component';
 import { collection, doc, getFirestore, onSnapshot, query, setDoc, where } from 'firebase/firestore';
-import { initializeApp } from 'firebase/app';
+import { FirebaseOptions, initializeApp } from 'firebase/app';
 import { environment } from '../../../environments/environment';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 
@@ -42,7 +42,7 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
 })
 export class InfoPanelComponent implements OnInit {
 
-  public app = initializeApp(environment.firebaseConfig);
+  public app = initializeApp(environment.firebaseConfig as FirebaseOptions);
   public firestore = getFirestore(this.app);
 
   public issues: Issue[] = [];

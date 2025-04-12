@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, ElementRef, OnDestroy, OnInit, QueryList, ViewChildren, ViewContainerRef } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { initializeApp } from 'firebase/app';
+import { FirebaseOptions, initializeApp } from 'firebase/app';
 import { get, getDatabase, onValue, ref, set, update } from 'firebase/database';
 import { doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
 import { environment } from '../../../environments/environment';
@@ -27,7 +27,7 @@ import { VoterCardComponent } from "../../components/voter-card/voter-card.compo
 })
 export class PlanningTableComponent implements OnInit, OnDestroy {
 
-  public app = initializeApp(environment.firebaseConfig);
+  public app = initializeApp(environment.firebaseConfig as FirebaseOptions);
   public database = getDatabase(this.app);
   public firestore = getFirestore(this.app);
   public dbRef = ref(this.database, 'plannings/teste-chave-aleatoria/');
