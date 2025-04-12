@@ -1,12 +1,13 @@
 export const environment = {
     production: true,
     firebaseConfig: {
-        apiKey: "AIzaSyAkksReB8wQzALP3kXMyk1C_4-MdgoyQXU",
-        authDomain: "piffer-planning.firebaseapp.com",
-        projectId: "piffer-planning",
-        storageBucket: "piffer-planning.firebasestorage.app",
-        messagingSenderId: "621882144054",
-        appId: "1:621882144054:web:eaf88271ef94abd23def97",
-        measurementId: "G-XVRTE2BGNG"
-    }
+        apiKey: process.env['FIREBASE_API_KEY'] || null,
+        authDomain: process.env['FIREBASE_AUTH_DOMAIN'] || null,
+        projectId: process.env['FIREBASE_PROJECT_ID'] || null,
+        storageBucket: process.env['FIREBASE_STORAGE_BUCKET'] || null,
+        messagingSenderId: process.env['FIREBASE_MESSAGING_SENDER_ID'] || null,
+        appId: process.env['FIREBASE_APP_ID'] || null,
+        measurementId: process.env['FIREBASE_MEASUREMENT_ID'] || null,
+    },
+    testeVariavel: process.env['TESTE_VARIAVEL_AMBIENTE'] || 'não carregou :(',
 }

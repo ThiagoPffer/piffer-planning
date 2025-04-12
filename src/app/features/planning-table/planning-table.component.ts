@@ -55,6 +55,7 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
     this.loadPlanningData();
     this.setVotersListener();
     this.setCurrentIssueListener();
+    console.log(environment.testeVariavel)
   }
 
   loadPlanningData() {
@@ -200,7 +201,7 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   }
 
   public poked(voterId: string, poke: any) {
-    const voterCard = this.voterCardList.toArray().find(c => c.voter.uid === voterId);
+    const voterCard = this.voterCardList?.toArray().find(c => c.voter.uid === voterId);
     const voterCardPosition = voterCard?.cardElement.nativeElement.getBoundingClientRect();
     if (voterCardPosition) {
       const component = this.viewContainerRef.createComponent(EmojiComponent);
