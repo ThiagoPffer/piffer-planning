@@ -8,6 +8,5 @@ export const environment = {
         messagingSenderId: process.env['FIREBASE_MESSAGING_SENDER_ID'] || 'null',
         appId: process.env['FIREBASE_APP_ID'] || 'null',
         measurementId: process.env['FIREBASE_MEASUREMENT_ID'] || 'null',
-    },
-    testeVariavel: process.env['TESTE_VARIAVEL_AMBIENTE'] || 'não carregou :(',
+    }
 }

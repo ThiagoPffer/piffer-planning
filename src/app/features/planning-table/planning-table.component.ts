@@ -55,7 +55,6 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
     this.loadPlanningData();
     this.setVotersListener();
     this.setCurrentIssueListener();
-    console.log(environment.testeVariavel)
   }
 
   loadPlanningData() {
