@@ -17,6 +17,7 @@
             <div class="header-title">
                 <a href class="mdi mdi-arrow-left" [routerLink]="['../']" routerLinkActive="router-link-active"></a>
                 <h2>{{ planningName }}</h2>
+                <span class="planning-id-badge" (click)="copyPlanningId()">{{ planningId }}</span>
             </div>
             <span *ngIf="voters.length">Votantes: {{ voters.length }}</span>
         </header>
@@ -53,7 +54,7 @@
         </footer>
     </div>
     <info-panel
-        [planningId]="'teste-chave-aleatoria'"
+        [planningId]="planningId"
         [currentIssue]="currentIssue"
         (onStartVoting)="onStartVoting($event)"
         (onReset)="onReset($event)"

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, OnDestroy, OnInit, QueryList, ViewChildren, ViewContainerRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, QueryList, ViewChildren, ViewContainerRef } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FirebaseOptions, initializeApp } from 'firebase/app';
 import { get, getDatabase, onValue, ref, set, update } from 'firebase/database';
 import { doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
@@ -9,6 +9,7 @@ import { environment } from '../../../environments/environment';
 import { InfoPanelComponent } from "../../components/info-panel/info-panel.component";
 import { EmojiComponent } from "../../components/voter-card/emoji/emoji.component";
 import { VoterCardComponent } from "../../components/voter-card/voter-card.component";
+import { ToastService } from '../../core/toast.service';
 
 
 @Component({
@@ -30,8 +31,8 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   public app = initializeApp(environment.firebaseConfig as FirebaseOptions);
   public database = getDatabase(this.app);
   public firestore = getFirestore(this.app);
-  public dbRef = ref(this.database, 'plannings/teste-chave-aleatoria/');
 
+  public planningId!: string;
   public planningName!: string;
   public showNameDialog: boolean = false;
   public userName!: string;
@@ -47,18 +48,21 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   @ViewChildren('voterCardList') voterCardList!: QueryList<VoterCardComponent>;
 
   constructor(
-    private viewContainerRef: ViewContainerRef
+    private router: Router,
+    private viewContainerRef: ViewContainerRef,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
-    this.loadUserData();
+    this.planningId = this.router.url.split('/')[1];
     this.loadPlanningData();
+    this.loadUserData();
     this.setVotersListener();
     this.setCurrentIssueListener();
   }
 
   loadPlanningData() {
-    get(ref(this.database, 'plannings/teste-chave-aleatoria/name')).then(snapshot => {
+    get(ref(this.database, `plannings/${this.planningId}/name`)).then(snapshot => {
       if (snapshot.exists()) {
         this.planningName = snapshot.val() as string;
       }
@@ -66,7 +70,7 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   }
 
   setVotersListener() {
-    onValue(ref(this.database, 'plannings/teste-chave-aleatoria/voters/'), snapshot => {
+    onValue(ref(this.database, `plannings/${this.planningId}/voters/`), snapshot => {
       const users = Object.values(snapshot.val()) as User[];
       this.voters = users.filter((u: any) => u.online && !u.observer) as Voter[];
       this.observers = users.filter((u: any) => u.online && u.observer) as User[];
@@ -89,7 +93,7 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   setPokesListener(voter: Voter) {
     if (!this.pokeControl[voter.uid]) {
       this.pokeControl[voter.uid] = {} as { count: string, unsubscribe: any };
-      this.pokeControl[voter.uid].unsubscribe = onValue(ref(this.database, 'plannings/teste-chave-aleatoria/pokes/'+voter.uid), snapshot => {
+      this.pokeControl[voter.uid].unsubscribe = onValue(ref(this.database, `plannings/${this.planningId}/pokes/${voter.uid}`), snapshot => {
         const poke = snapshot.val() as any;
   
         if (this.pokeControl[voter.uid].count !== poke?.count) {
@@ -102,15 +106,18 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   }
 
   setCurrentIssueListener() {
-    onValue(ref(this.database, 'plannings/teste-chave-aleatoria/issue'), async snapshot => {
+    onValue(ref(this.database, `plannings/${this.planningId}/issue`), async snapshot => {
       const issueId = snapshot.val() as string;
       this.currentIssue = issueId ? (await getDoc(doc(this.firestore, 'issues', issueId))).data() as Issue : null;
+      if (this.currentIssue?.description) {
+        this.toastService.showMessage('Votando: ' + this.currentIssue?.description);
+      }
     })
   }
 
   ngOnDestroy(): void {
     if (this.user?.uid) {
-      update(ref(this.database, 'plannings/teste-chave-aleatoria/voters/' + this.user.uid), { online: false });
+      update(ref(this.database, `plannings/${this.planningId}/voters/${this.user.uid}`), { online: false });
     }
   }
 
@@ -135,7 +142,7 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
       return;
     }
     this.user = userData;
-    update(ref(this.database, 'plannings/teste-chave-aleatoria/voters/' + this.user.uid), {...userData, online: true});
+    update(ref(this.database, `plannings/${this.planningId}/voters/${this.user.uid}`), {...userData, online: true});
   }
 
   public onIssuesLoaded(issues: Issue[]) {
@@ -145,7 +152,7 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   public saveUser() {
     if (this.userName) {
       this.user = { name: this.userName, uid: crypto.randomUUID(), observer: this.isObserver };
-      set(ref(this.database, 'plannings/teste-chave-aleatoria/voters/' + this.user.uid), {...this.user, online: true});
+      set(ref(this.database, `plannings/${this.planningId}/voters/${this.user.uid}`), {...this.user, online: true});
       localStorage.setItem('userData', JSON.stringify(this.user));
       this.showNameDialog = false;
     }
@@ -153,7 +160,7 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
 
   public onVote(option: string) {
     this.votedOption = option;
-    set(ref(this.database, 'plannings/teste-chave-aleatoria/voters/' + this.user.uid + '/votedOption'), option);
+    set(ref(this.database, `plannings/${this.planningId}/voters/` + this.user.uid + '/votedOption'), option);
   }
 
   public onReset(issue: Issue) {
@@ -163,7 +170,7 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   }
 
   public resetVotes(issue: string | null) {
-    update(ref(this.database, 'plannings/teste-chave-aleatoria/'), {
+    update(ref(this.database, `plannings/${this.planningId}/`), {
       issue,
       voters: this.voters.reduce((v: any, voter: Voter) => {
         voter.votedOption = null;
@@ -192,7 +199,7 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
 
   public onPoke(voterId: string) {
     if (voterId !== this.user.uid) {
-      set(ref(this.database, 'plannings/teste-chave-aleatoria/pokes/' + voterId + '/'), {
+      set(ref(this.database, `plannings/${this.planningId}/pokes/${voterId}/`), {
         count: Math.random().toFixed(5),
         emoji: '💩'
       });
@@ -212,6 +219,14 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
       component.setInput('emoji', poke.emoji);
       setTimeout(() => component.destroy(), 2400);
     }
+  }
+
+  copyPlanningId() {
+    navigator.clipboard.writeText(this.planningId).then(() => {
+      this.toastService.showMessage('ID da planning copiado');
+    }).catch(err => {
+      console.error('Failed to copy: ', err);
+    });
   }
 }
 

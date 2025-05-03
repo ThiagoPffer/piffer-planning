@@ -63,7 +63,7 @@ export class InfoPanelComponent implements OnInit {
   }
 
   public loadIssues() {
-    onSnapshot(query(collection(this.firestore, 'issues'), where('planningId', '==', 'teste-chave-aleatoria')), snap => {
+    onSnapshot(query(collection(this.firestore, 'issues'), where('planningId', '==', this.planningId)), snap => {
       this.issues = snap.docs.map(doc => doc.data() as Issue);
       this.onIssuesLoadedEvent.emit(this.issues);
     });
@@ -89,7 +89,7 @@ export class InfoPanelComponent implements OnInit {
     if (this.addNewIssueFormGroup.valid) {
       const newIssue = {
         ...this.addNewIssueFormGroup.getRawValue(),
-        planningId: 'teste-chave-aleatoria',
+        planningId: this.planningId,
         status: EnumIssueStatus.VOTAR
       }
       this.addNewIssueFormGroup.reset();

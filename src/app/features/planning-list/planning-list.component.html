@@ -1,12 +1,38 @@
-<section class="main-section">
-    <header>
-        <h2>Plannings ativas</h2>
-        <span>1</span>
-    </header>
-    <ul class="planning-list">
-        <li class="planning-list-item" (click)="onClickPlanning()" >
-            <h4>Planning</h4>
-            <!-- <span>10 pessoas</span> -->
-        </li>
-    </ul>
+<section class="main-section" *ngIf="!started">
+    <div class="title-group">
+        <h2>Estime as atividades de sua equipe</h2>
+        <p>Fácil de usar e intuitivo</p>
+    </div>
+    <button class="default-button" (click)="started = true">Comece agora</button>
+</section>
+
+<section class="room-selection-section" *ngIf="started">
+    <div class="panel">
+        <div class="panel-overlay" *ngIf="createLoading">
+            <span class="mdi mdi-loading"></span>
+        </div>
+        <h3>Iniciar nova sala</h3>
+        <div class="panel-content">
+            <div class="input-group">
+                <label for="room-name">Nome da sala</label>
+                <input type="text" id="room-name" [(ngModel)]="roomName">
+            </div>
+            <button class="default-button" [disabled]="!roomName" (click)="createRoom(roomName)">Criar</button>
+        </div>
+    </div>
+    <div class="panel">
+        <div class="panel-overlay" *ngIf="accessLoading">
+            <span class="mdi mdi-loading"></span>
+        </div>
+        <h3>Entrar em uma sala existente</h3>
+        <div class="panel-content">
+            <div class="input-group">
+                <label for="room-id">Insira o ID da sala</label>
+                <input type="text" id="room-id" [(ngModel)]="roomId">
+            </div>
+            <button class="default-button" [disabled]="!roomId" (click)="accessRoom(roomId)">
+                Entrar
+            </button>
+        </div>
+    </div>
 </section>

@@ -44,6 +44,16 @@ app-planning-list {
     flex: 1;
 }
 
+.row-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.column-container {
+    display: flex;
+    flex-direction: column;
+}
+
 input {
     padding: 15px;
     font-size: .875rem;
@@ -118,11 +128,17 @@ input:focus {
     border-radius: 5px;
     transition: .3s;
     width: 100%;
+    user-select: none;
+
+    &:hover {
+        opacity: .8;
+    }
+
+    &:disabled {
+        opacity: .5;
+    }
 }
 
-.default-button:hover {
-    opacity: .8;
-}
 
 .icon-button {
     display: flex;

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { initializeApp } from 'firebase/app';
-import { getDatabase, onValue, ref } from 'firebase/database';
+import { get, getDatabase, ref, set } from 'firebase/database';
 import { getFirestore } from 'firebase/firestore';
 import { environment } from '../../environments/environment';
 
@@ -15,10 +15,20 @@ export class FirebaseService {
 
   constructor() { }
 
-  public listenRtdb(url: string) {
-    onValue(ref(this.database, url), (snapshot) => {
-      
-    })
+  public async exists(url: string) {
+    const dbRef = ref(this.database, url);
+    const snapshot = await get(dbRef);
+    return snapshot.exists();
+  }
+
+  public list(url: string) {
+    const dbRef = ref(this.database, url);
+    return get(dbRef);
+  }
+
+  public create(url: string, data: any) {
+    const dbRef = ref(this.database, url);
+    return set(dbRef, data); 
   }
 
 }
