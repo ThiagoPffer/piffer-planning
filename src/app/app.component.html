@@ -1,5 +1,11 @@
 <header>
     <h1>Piffer planning</h1>
+    <button class="icon-button" (click)="toggleDarkMode()">
+        <span class="mdi" [ngClass]="{
+            'mdi-white-balance-sunny': !isDarkMode,
+            'mdi-moon-waxing-crescent': isDarkMode
+        }"></span>
+    </button>
 </header>
 <main style="display: flex; flex: 1">
     <router-outlet></router-outlet>

@@ -78,7 +78,7 @@
         height: fit-content;
         padding: 20px;
         border-radius: 6px;
-        border: 1px solid var(--cinza-claro);
+        border: 2px solid var(--border);
         opacity: .6;
         transition: .2s;
         position: relative;

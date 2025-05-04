@@ -14,8 +14,8 @@ import { Voter } from '../../features/planning-table/planning-table.component';
   animations: [
     trigger('cardTurn', [
       state('front', style({
-        backgroundColor: 'white',
-        border: '2px solid var(--cinza-medio)',
+        backgroundColor: 'var(--secondary)',
+        border: '2px solid var(--border)',
         transform: 'rotate3d(0, 1, 0, 0)'
       })),
       state('back', style({
@@ -25,7 +25,7 @@ import { Voter } from '../../features/planning-table/planning-table.component';
       })),
       transition('back => front', [
         animate('.2s', style({
-          backgroundColor: 'white',
+          backgroundColor: 'var(--secondary)',
           transform: 'rotate3d(0, 1, 0, 0)'
         }))
       ])

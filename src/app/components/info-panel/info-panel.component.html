@@ -9,11 +9,10 @@
         </button>
     </header>
     <div class="info-issue-list">
-        <div class="info-issue-list-item" *ngFor="let issue of issues" [ngStyle]="{'border': issue.status === 'Votando' ? '2px solid var(--primaria)' : '2px solid white'}">
+        <div class="info-issue-list-item" *ngFor="let issue of issues" [ngStyle]="{'border': issue.status === 'Votando' ? '2px solid var(--primaria)' : '2px solid var(--info-panel-item-border)'}">
             <div style="display: flex; flex-direction: column; gap: 15px;">
                 <div>
                     <h4>{{ issue.description }}</h4>
-                    <a [href]="issue.url" target="_blank">Issue link</a>
                 </div>
                 <div style="display: flex; flex-direction: row; gap: 10px;">
                     <span class="issue-badge" *ngIf="issue.status !== 'Votar'">{{ issue.status }}</span>

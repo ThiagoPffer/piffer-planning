@@ -29,12 +29,12 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
       transition('closed => opened', [ animate('.3s ease-out') ]),
       transition('opened => closed', [
         animate('.3s ease-out', style({
-          margin: 0,
-          width: 0,
-          minWidth: 0,
-          opacity: 0,
-          padding: 0,
-          transform: 'translateY(50px)'
+          display: 'none',
+          margin: '0',
+          width: '0',
+          minWidth: '0',
+          opacity: '0',
+          padding: '0'
         }))
       ])
     ])
@@ -73,7 +73,7 @@ export class InfoPanelComponent implements OnInit {
     this.isAddingNewIssue = !this.isAddingNewIssue;
     this.addNewIssueFormGroup = this.formBuilder.group({
       description: ['', Validators.required],
-      url: ['', Validators.required],
+      url: [''],
     })
   }
 

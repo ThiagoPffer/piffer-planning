@@ -23,7 +23,7 @@ import { ToastService } from '../../core/toast.service';
         position: fixed;
         top: 20px;
         right: 20px;
-        background-color: white;
+        background-color: var(--secondary);
         color: black;
         padding: 10px 20px;
         border: 1px solid var(--primaria);
