@@ -5,6 +5,13 @@
     justify-content: center;
     gap: 10px;
     width: 100px;
+    transition: .2s;
+    user-select: none;
+    cursor: pointer;
+
+    &:hover {
+        transform: translateY(-5px);
+    }
 
     & .voter-card {
         display: flex;
