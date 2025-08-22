@@ -15,12 +15,18 @@ import { CommonModule } from '@angular/common';
   styleUrl: './app.component.css'
 })
 export class AppComponent implements OnInit {
+  userData = JSON.parse(localStorage.getItem('userData') as string) || null;
   isDarkMode: boolean = localStorage.getItem('darkMode') === 'true' || false;
+  isMenuOpen: boolean = false;
 
   ngOnInit(): void {
     document.body.classList.toggle('dark-mode', this.isDarkMode);
   }
-  
+
+  toggleMenu() {
+    this.isMenuOpen = !this.isMenuOpen;
+  }
+
   toggleDarkMode() {
     this.isDarkMode = !this.isDarkMode;
     document.body.classList.toggle('dark-mode', this.isDarkMode);

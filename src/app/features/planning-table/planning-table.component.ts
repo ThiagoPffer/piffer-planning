@@ -221,12 +221,18 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
     }
   }
 
-  copyPlanningId() {
+  public copyPlanningId() {
     navigator.clipboard.writeText(this.planningId).then(() => {
       this.toastService.showMessage('ID da planning copiado');
     }).catch(err => {
       console.error('Failed to copy: ', err);
     });
+  }
+
+  public toggleObserver() {
+    this.user.observer = !this.user.observer;
+    update(ref(this.database, `plannings/${this.planningId}/voters/${this.user.uid}`), { observer: this.user.observer });
+    this.isObserver = this.user.observer;
   }
 }
 

@@ -6,29 +6,41 @@ import { ToastService } from '../../core/toast.service';
 @Component({
   selector: 'app-toast',
   template: `
-    <div class="toast" [@toastAppear]="toastInfo.showToast ? 'opened' : 'closed'">
-      <span>{{ toastInfo.message }}</span>
-      <button (click)="closeToast()">
-        <span class="mdi mdi-close"></span>
-      </button>
+    <div class="toast-container" [@toastAppear]="toastInfo.showToast ? 'opened' : 'closed'">
+      <div class="toast">
+        <span>{{ toastInfo.message }}</span>
+        <button (click)="closeToast()">
+          <span class="mdi mdi-close"></span>
+        </button>
+      </div>
     </div>
   `,
   styles: [
     `
+      .toast-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        top: 0;
+        left: 50%;
+        right: 50%;
+        width: 'fit-content';
+        z-index: 9999;
+      }
       .toast {
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
-        position: fixed;
-        top: 20px;
-        right: 20px;
         background-color: var(--secondary);
         color: black;
         padding: 10px 20px;
-        border: 1px solid var(--primaria);
+        border: 2px solid var(--border);
         border-radius: 5px;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        width: fit-content;
+        min-width: 300px;
         display: flex;
         align-items: center;
         justify-content: space-between;

@@ -56,7 +56,8 @@
     100% { transform: rotate(360deg); }
 }
 
-.room-selection-section {
+.room-selection-section,
+.user-name-section {
     display: flex;
     flex-direction: row;
     align-items: center;

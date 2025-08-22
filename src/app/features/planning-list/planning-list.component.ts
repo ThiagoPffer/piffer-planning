@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FirebaseService } from '../../core/firebase.service';
+import { Voter } from '../planning-table/planning-table.component';
 
 @Component({
   selector: 'app-planning-list',
@@ -16,9 +17,11 @@ import { FirebaseService } from '../../core/firebase.service';
 })
 export class PlanningListComponent {
 
-  started: boolean = false;
+  userName!: string | null;
   roomName!: string | null;
   roomId!: string | null;
+  userData: Voter | null = JSON.parse(localStorage.getItem('userData') as string) as Voter | null;
+  started: boolean = false;
 
   accessLoading: boolean = false;
   createLoading: boolean = false;
@@ -30,6 +33,18 @@ export class PlanningListComponent {
 
   public onClickPlanning() {
     this.router.navigateByUrl('planning-table');
+  }
+
+  saveUser(userName: string | null) {
+    this.userName = userName;
+    if (this.userName) {
+      this.userData = { 
+        name: this.userName,
+        uid: crypto.randomUUID(),
+        observer: false 
+      };
+      localStorage.setItem('userData', JSON.stringify(this.userData));
+    }
   }
 
   createRoom(name: string | null) {

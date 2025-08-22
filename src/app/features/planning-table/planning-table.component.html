@@ -15,11 +15,28 @@
     <div class="board">
         <header>
             <div class="header-title">
-                <a href class="mdi mdi-arrow-left" [routerLink]="['../']" routerLinkActive="router-link-active"></a>
+                <a href 
+                    class="icon-button mdi mdi-arrow-left" 
+                    [routerLink]="['../']" 
+                    routerLinkActive="router-link-active">
+                </a>
                 <h2>{{ planningName }}</h2>
                 <span class="planning-id-badge" (click)="copyPlanningId()">{{ planningId }}</span>
             </div>
-            <span *ngIf="voters.length">Votantes: {{ voters.length }}</span>
+            <div class="header-info">
+                <span *ngIf="voters.length">Votantes: {{ voters.length }}</span>
+                <button class="icon-button" 
+                    *ngIf="this.user"
+                    [disabled]="currentIssue?.status === 'Votando'"
+                    [title]="this.user.observer ? 'Observador' : 'Votante'" 
+                    (click)="toggleObserver()"
+                >
+                    <span class="mdi" [ngClass]="{
+                        'mdi-account-outline': !this.user.observer,
+                        'mdi-eye-outline': this.user.observer
+                    }"></span>
+                </button>
+            </div>
         </header>
         <div class="observer-card-list" *ngIf="observers.length">
             <div class="observer-card" *ngFor="let observer of observers">
@@ -32,6 +49,7 @@
                 id="{{voter.uid}}"
                 [voter]="voter" 
                 [votingFinished]="!!currentIssue?.averageVoting"
+                [userIsObserver]="!!user.observer"
                 (onPoke)="onPoke($event)"
                 #voterCardList 
                 *ngFor="let voter of voters"

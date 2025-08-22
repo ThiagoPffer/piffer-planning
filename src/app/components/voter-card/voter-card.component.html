@@ -1,10 +1,10 @@
-<div class="voter-card-group" #cardElement>
+<div class="voter-card-group" #cardElement (click)="onPoke()">
     <div 
         class="voter-card" 
-        [@cardTurn]="voter.votedOption && !votingFinished ? 'back' : 'front'">
-        <span *ngIf="votingFinished">{{ voter.votedOption }}</span>
+        [@cardTurn]="voter.votedOption && !votingFinished && !userIsObserver ? 'back' : 'front'">
+        <span *ngIf="votingFinished || userIsObserver">{{ voter.votedOption }}</span>
     </div>
-    <span class="voter-name" (click)="onPoke()">
+    <span class="voter-name">
         {{ voter.name }}
     </span>
 </div>

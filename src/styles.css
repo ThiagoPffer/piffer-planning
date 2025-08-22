@@ -45,7 +45,7 @@
     --muted: #292929;
     --muted-foreground: #a3a3a3;
 
-    --secondary: #292929;
+    --secondary: #313131;
     --secondary-foreground: #fafafa;
 
     --primaria: #2262f8;
@@ -211,15 +211,26 @@ input:focus {
 .icon-button {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    gap: 10px;
     padding: 5px 10px;
     border-radius: 6px;
-    font-size: 1.2rem;
     transition: .2s;
     background-color: transparent;
-}
+    text-decoration: none;
+    color: var(--foreground);
 
-.icon-button:hover {
-    background-color: var(--border);
-    cursor: pointer;
+    &:hover {
+        background-color: var(--border);
+        cursor: pointer;
+    }
+
+    &:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+    }
+
+    & span {
+        font-size: 1.2rem;
+    }
 }

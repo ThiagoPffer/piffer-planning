@@ -1,11 +1,27 @@
 <header>
     <h1>Piffer planning</h1>
-    <button class="icon-button" (click)="toggleDarkMode()">
-        <span class="mdi" [ngClass]="{
-            'mdi-white-balance-sunny': !isDarkMode,
-            'mdi-moon-waxing-crescent': isDarkMode
-        }"></span>
-    </button>
+    <div class="user-info-group">
+        <div class="menu-group" *ngIf="userData">
+            <button class="icon-button">
+                {{ userData.name }}
+            </button>
+            <div class="menu-list" *ngIf="isMenuOpen">
+                <!-- <button class="icon-button" (click)="toggleDarkMode()">
+                    {{ isDarkMode ? 'Modo escuro' : 'Modo claro' }}
+                    <span class="mdi" [ngClass]="{
+                        'mdi-white-balance-sunny': !isDarkMode,
+                        'mdi-moon-waxing-crescent': isDarkMode
+                    }"></span>
+                </button> -->
+            </div>
+        </div>
+        <button class="icon-button" (click)="toggleDarkMode()">
+            <span class="mdi" [ngClass]="{
+                'mdi-white-balance-sunny': !isDarkMode,
+                'mdi-moon-waxing-crescent': isDarkMode
+            }"></span>
+        </button>
+    </div>
 </header>
 <main style="display: flex; flex: 1">
     <router-outlet></router-outlet>

@@ -36,6 +36,7 @@ export class VoterCardComponent {
 
   @Input() public votingFinished: boolean = false;
   @Input() public voter!: Voter;
+  @Input() public userIsObserver: boolean = false;
   @Output('onPoke') public onPokeEmmiter: EventEmitter<string> = new EventEmitter();
   @ViewChild('cardElement', { static: true }) cardElement!: ElementRef;
 
