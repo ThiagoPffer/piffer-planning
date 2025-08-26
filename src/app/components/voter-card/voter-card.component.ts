@@ -1,6 +1,6 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { Voter } from '../../features/planning-table/planning-table.component';
 
 @Component({
@@ -29,16 +29,47 @@ import { Voter } from '../../features/planning-table/planning-table.component';
           transform: 'rotate3d(0, 1, 0, 0)'
         }))
       ])
+    ]),
+    trigger('cardJump', [
+      state('still', style({
+        transform: 'translateY(0)'
+      })),
+      state('jump', style({
+        transform: 'translateY(-10px)'
+      })),
+      transition('still => jump', [
+        animate('.1s', style({
+          transform: 'translateY(-10px)'
+        })),
+        animate('.1s', style({
+          transform: 'translateY(0)'
+        }))
+      ])
     ])
   ]
 })
-export class VoterCardComponent {
+export class VoterCardComponent implements OnChanges {
 
   @Input() public votingFinished: boolean = false;
   @Input() public voter!: Voter;
   @Input() public userIsObserver: boolean = false;
   @Output('onPoke') public onPokeEmmiter: EventEmitter<string> = new EventEmitter();
   @ViewChild('cardElement', { static: true }) cardElement!: ElementRef;
+
+  public cardJumpState: 'still' | 'jump' = 'still';
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['voter'] && changes['voter'].currentValue.votedOption !== changes['voter'].previousValue?.votedOption) {
+      this.triggerJump();
+    }
+  }
+
+  private triggerJump() {
+    this.cardJumpState = 'jump';
+    setTimeout(() => {
+      this.cardJumpState = 'still';
+    }, 20);
+  }
 
   public onPoke() {
     this.onPokeEmmiter.emit(this.voter.uid);

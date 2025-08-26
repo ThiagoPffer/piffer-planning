@@ -1,7 +1,8 @@
 <div class="voter-card-group" #cardElement (click)="onPoke()">
     <div 
         class="voter-card" 
-        [@cardTurn]="voter.votedOption && !votingFinished && !userIsObserver ? 'back' : 'front'">
+        [@cardTurn]="voter.votedOption && !votingFinished && !userIsObserver ? 'back' : 'front'"
+        [@cardJump]="cardJumpState">
         <span *ngIf="votingFinished || userIsObserver">{{ voter.votedOption }}</span>
     </div>
     <span class="voter-name">

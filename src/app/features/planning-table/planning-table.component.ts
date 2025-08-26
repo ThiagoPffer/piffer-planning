@@ -110,6 +110,7 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
       const issueId = snapshot.val() as string;
       this.currentIssue = issueId ? (await getDoc(doc(this.firestore, 'issues', issueId))).data() as Issue : null;
       if (this.currentIssue?.description) {
+        this.votedOption = null;
         this.toastService.showMessage('Votando: ' + this.currentIssue?.description);
       }
     })
@@ -158,7 +159,11 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
     }
   }
 
-  public onVote(option: string) {
+  public onVote(option: string | null) {
+    if (this.votedOption === option) {
+      option = null;
+    }
+
     this.votedOption = option;
     set(ref(this.database, `plannings/${this.planningId}/voters/` + this.user.uid + '/votedOption'), option);
   }
@@ -233,6 +238,7 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
     this.user.observer = !this.user.observer;
     update(ref(this.database, `plannings/${this.planningId}/voters/${this.user.uid}`), { observer: this.user.observer });
     this.isObserver = this.user.observer;
+    localStorage.setItem('userData', JSON.stringify(this.user));
   }
 }
 
