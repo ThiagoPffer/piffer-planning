@@ -11,15 +11,40 @@
         <button class="default-button" (click)="saveUser()">Enviar</button>
     </div>
 </div>
+<div class="modal-overlay" [ngClass]="{'show': showConfigDialog}" id="modal">
+    <div class="modal" *ngIf="user.admin">
+        <header>
+            <h3>Lista de usuários</h3>
+            <button class="icon-button" (click)="toggleConfigurations()">
+                <span class="mdi mdi-close"></span>
+            </button>
+        </header>
+        <ul>
+            <li *ngFor="let u of users">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span class="mdi" [ngClass]="{
+                        'mdi-account-outline': !u.observer,
+                        'mdi-eye-outline': u.observer
+                    }"></span>
+                    {{ u.name }}
+                </div>
+                <button class="icon-button" (click)="kickOutUser(u)" *ngIf="u.uid !== user.uid" title="Expulsar usuário">
+                    <span class="mdi mdi-trash-can-outline"></span>
+                </button>
+            </li>
+        </ul>
+    </div>
+</div>
 <section class="main-section">
     <div class="board">
         <header>
             <div class="header-title">
-                <a href 
-                    class="icon-button mdi mdi-arrow-left" 
-                    [routerLink]="['../']" 
-                    routerLinkActive="router-link-active">
-                </a>
+                <button class="icon-button"
+                    title="Sair da sala" 
+                    (click)="onLeavePlanning()"
+                >
+                    <span class="mdi mdi-arrow-left"></span>
+                </button>
                 <h2>{{ planningName }}</h2>
                 <span class="planning-id-badge" (click)="copyPlanningId()">{{ planningId }}</span>
             </div>
@@ -36,10 +61,18 @@
                         'mdi-eye-outline': this.user.observer
                     }"></span>
                 </button>
+                <button class="icon-button" 
+                    *ngIf="this.user.admin"
+                    title="Gerenciar usuários"
+                    (click)="toggleConfigurations()"
+                >
+                    <span class="mdi mdi-account-multiple-outline"></span>
+                </button>
             </div>
         </header>
         <div class="observer-card-list" *ngIf="observers.length">
             <div class="observer-card" *ngFor="let observer of observers">
+                <span *ngIf="observer.admin" class="mdi mdi-crown"></span>
                 <span>{{ observer.name }}</span>
                 <span class="mdi mdi-eye-outline"></span>
             </div>
@@ -48,11 +81,12 @@
             <voter-card 
                 id="{{voter.uid}}"
                 [voter]="voter" 
+                [user]="user"
                 [votingFinished]="!!currentIssue?.averageVoting"
-                [userIsObserver]="!!user.observer"
                 (onPoke)="onPoke($event)"
                 #voterCardList 
                 *ngFor="let voter of voters"
+                [ngStyle]="{'z-index': voterCardList.showEmojiMenu ? 10 : 0}"
             />
         </div>
         <footer>

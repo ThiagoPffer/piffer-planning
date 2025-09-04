@@ -3,6 +3,17 @@
     overflow: hidden;
 }
 
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    & li {
+        margin: 0;
+        padding: 0;
+    }
+}
+
 .main-section {
     display: flex;
     flex-direction: row;
@@ -128,8 +139,60 @@ info-panel {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     text-align: center;
     width: 600px;
-    gap: 15px;
+    max-height: 600px;
+    gap: 25px;
     z-index: 101;
+
+    & header {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    & ul {
+        display: flex;
+        flex-direction: column;
+        overflow: auto;
+        height: 100%;
+        gap: 5px;
+
+        & li {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            height: 45px;
+            font-size: 1.1rem;
+            text-align: left;
+            color: var(--foreground);
+            padding: 5px 10px;
+            border-bottom: 1px solid var(--border);
+
+            &:hover {
+                background-color: var(--secondary);
+                border-radius: 6px;
+            }
+        }
+    }
+}
+
+.modal ::-webkit-scrollbar {
+    width: 5px;
+}
+
+.modal ::-webkit-scrollbar-track {
+    background: var(--border);
+}
+
+.modal ::-webkit-scrollbar-thumb {
+    background: var(--primaria-claro);
+    border-radius: 50px;
+}
+
+.modal ::-webkit-scrollbar-thumb:hover {
+    background: var(--primaria);
 }
 
 /* Exibir modal */
@@ -148,6 +211,7 @@ info-panel {
     height: 100%;
     padding: 0 15px;
     gap: 20px;
+    position: relative;
 }
 
 .option-card-list {

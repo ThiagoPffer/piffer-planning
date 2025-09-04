@@ -1,3 +1,8 @@
+:host {
+    z-index: 0;
+    user-select: none;
+}
+
 .voter-card-group {
     display: flex;
     flex-direction: column;
@@ -7,10 +12,21 @@
     width: 100px;
     transition: .2s;
     user-select: none;
-    cursor: pointer;
+    position: relative;
 
     &:hover {
         transform: translateY(-5px);
+    }
+
+    & .admin-icon {
+        position: absolute;
+        top: -20px;
+        right: auto;
+        left: auto;
+        font-size: 1.6rem;
+        color: gold;
+        user-select: none;
+        z-index: 10;
     }
 
     & .voter-card {
@@ -23,17 +39,36 @@
         height: 150px;
         border-radius: 6px;
         transition: .2s;
+        z-index: 0;
+        position: relative;
     }
     
     & .voter-name {
         font-weight: 500;
+        font-size: .875rem;
         text-align: center;
         padding: 5px 15px;
+        border: 1px solid var(--border);
         border-radius: 6px;
         cursor: pointer;
         transition: .2s;
         user-select: none;
         color: var(--foreground) !important;
+    }
+
+    & .emoji-selection-menu {
+        position: absolute;
+        top: 0;
+        right: -60px;
+        background: var(--background);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 5px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        cursor: pointer;
+        user-select: none;
+        transition: .2s;
+        z-index: 1000;
     }
 }
 

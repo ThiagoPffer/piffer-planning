@@ -11,6 +11,7 @@ import { Component, Input, OnDestroy, OnInit } from '@angular/core';
       position: absolute;
       font-size: 1.8rem;
       user-select: none;
+      z-index: 20;
     }
   `],
   animations: [

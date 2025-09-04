@@ -55,16 +55,41 @@
     align-items: center;
     text-decoration: none;
     list-style: none;
-    padding: 15px;
     border-radius: 6px;
+    max-width: 300px;
     background-color: var(--info-panel-item-background);
+    position: relative;
 
     & h4 {
         font-weight: 500;
+        font-size: .875rem;
     }
 
     &:hover {
-        background-color: var(--info-panel-item-border);
+        background-color: var(--secondary);
+    }
+
+    & .average-badge-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: static;
+        left: 0;
+        background-color: var(--success-background);
+        padding: 0 10px;
+        height: 100%;
+
+        & .average-badge {
+            color: var(--success);
+        }
+    }
+
+    & .info-issue-list-item-content {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        width: 100%;
+        padding: 15px;
     }
 }
 
@@ -78,13 +103,6 @@
     font-size: .875rem;
     width: fit-content;
     padding: 1px 10px;
-}
-
-.average-badge {
-    background-color: var(--info-panel-background);
-    padding: 5px 10px;
-    border-radius: 6px;
-    transition: .2s;
 }
 
 .vote-button {

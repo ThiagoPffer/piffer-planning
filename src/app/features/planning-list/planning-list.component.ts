@@ -50,7 +50,12 @@ export class PlanningListComponent {
   createRoom(name: string | null) {
     this.createLoading = true;
     const newRoomId = crypto.randomUUID().slice(24);
-    this.firebaseService.create(`plannings/${newRoomId}`, {name}).then(() => { 
+    this.firebaseService.create(`plannings/${newRoomId}`, { 
+      name, 
+      voters: { 
+        [`${this.userData?.uid}`]: { ...this.userData, admin: true } 
+      }
+    }).then(() => { 
       this.router.navigateByUrl(`/${newRoomId}`);
     }).catch((error) => {
       this.createLoading = false;

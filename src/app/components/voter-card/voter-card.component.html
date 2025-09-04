@@ -1,11 +1,30 @@
-<div class="voter-card-group" #cardElement (click)="onPoke()">
+<div #cardElement 
+    class="voter-card-group" 
+    (mouseenter)="showEmojiMenu = true"
+    (mouseleave)="showEmojiMenu = false"
+>
+    <span class="admin-icon mdi mdi-crown" *ngIf="voter.admin"></span>
     <div 
         class="voter-card" 
-        [@cardTurn]="voter.votedOption && !votingFinished && !userIsObserver ? 'back' : 'front'"
+        [@cardTurn]="voter.votedOption && !votingFinished && !user.observer ? 'back' : 'front'"
         [@cardJump]="cardJumpState">
-        <span *ngIf="votingFinished || userIsObserver">{{ voter.votedOption }}</span>
+        <span *ngIf="votingFinished || user.observer">{{ voter.votedOption }}</span>
     </div>
     <span class="voter-name">
         {{ voter.name }}
     </span>
+    <div class="emoji-selection-menu" *ngIf="user.uid !== voter.uid && showEmojiMenu">
+        <button class="icon-button" (click)="onPoke('🥐')">
+            <span>🥐</span>
+        </button>
+        <button class="icon-button" (click)="onPoke('💩')">
+            <span>💩</span>
+        </button>
+        <button class="icon-button" (click)="onPoke('💣')">
+            <span>💣</span>
+        </button>
+        <button class="icon-button" (click)="onPoke('🦴')">
+            <span>🦴</span>
+        </button>
+    </div>
 </div>

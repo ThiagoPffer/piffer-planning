@@ -1,7 +1,7 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
-import { Voter } from '../../features/planning-table/planning-table.component';
+import { User, Voter } from '../../features/planning-table/planning-table.component';
 
 @Component({
   selector: 'voter-card',
@@ -52,11 +52,12 @@ export class VoterCardComponent implements OnChanges {
 
   @Input() public votingFinished: boolean = false;
   @Input() public voter!: Voter;
-  @Input() public userIsObserver: boolean = false;
-  @Output('onPoke') public onPokeEmmiter: EventEmitter<string> = new EventEmitter();
+  @Input() public user!: User;
+  @Output('onPoke') public onPokeEmmiter: EventEmitter<VoterPokeEvent> = new EventEmitter();
   @ViewChild('cardElement', { static: true }) cardElement!: ElementRef;
 
   public cardJumpState: 'still' | 'jump' = 'still';
+  public showEmojiMenu: boolean = false;
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['voter'] && changes['voter'].currentValue.votedOption !== changes['voter'].previousValue?.votedOption) {
@@ -71,8 +72,16 @@ export class VoterCardComponent implements OnChanges {
     }, 20);
   }
 
-  public onPoke() {
-    this.onPokeEmmiter.emit(this.voter.uid);
+  public onPoke(emoji: string = '🍰') {
+    this.onPokeEmmiter.emit({ 
+      voter: this.voter, 
+      emoji 
+    });
   }
 
+}
+
+export interface VoterPokeEvent {
+  voter: Voter;
+  emoji: string;
 }

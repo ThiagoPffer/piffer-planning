@@ -9,10 +9,21 @@
         </button>
     </header>
     <div class="info-issue-list">
-        <div class="info-issue-list-item" *ngFor="let issue of issues" [ngStyle]="{'border': issue.status === 'Votando' ? '2px solid var(--primaria)' : '2px solid var(--info-panel-item-border)'}">
-            <div style="display: flex; flex-direction: column; gap: 15px;">
-                <div>
+        <div class="info-issue-list-item" *ngFor="let issue of issues" [ngStyle]="{
+            'border': issue.status === 'Votando' ? '2px solid var(--primaria)' 
+                : issue.status === 'Finalizado' ? '2px solid var(--success-background)' 
+                : '2px solid var(--info-panel-item-border)'
+        }">
+            <div class="average-badge-container" *ngIf="issue.averageVoting">
+                <span class="average-badge">{{ issue.averageVoting }}</span>
+            </div>
+            
+            <div class="info-issue-list-item-content">
+                <div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; width: 100%;">
                     <h4>{{ issue.description }}</h4>
+                    <a class="icon-button" *ngIf="issue.url" [href]="issue.url" target="_blank">
+                        <span class="mdi mdi-link"></span>
+                    </a>
                 </div>
                 <div style="display: flex; flex-direction: row; gap: 10px;">
                     <span class="issue-badge" *ngIf="issue.status !== 'Votar'">{{ issue.status }}</span>
@@ -30,7 +41,6 @@
                     </button>
                 </div>
             </div>
-            <span class="average-badge" *ngIf="issue.averageVoting">{{ issue.averageVoting }}</span>
         </div>
     </div>
 </div>

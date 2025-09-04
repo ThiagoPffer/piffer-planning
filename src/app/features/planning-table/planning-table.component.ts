@@ -8,7 +8,7 @@ import { doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
 import { environment } from '../../../environments/environment';
 import { InfoPanelComponent } from "../../components/info-panel/info-panel.component";
 import { EmojiComponent } from "../../components/voter-card/emoji/emoji.component";
-import { VoterCardComponent } from "../../components/voter-card/voter-card.component";
+import { VoterCardComponent, VoterPokeEvent } from "../../components/voter-card/voter-card.component";
 import { ToastService } from '../../core/toast.service';
 
 
@@ -35,16 +35,20 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   public planningId!: string;
   public planningName!: string;
   public showNameDialog: boolean = false;
+  public showConfigDialog: boolean = false;
   public userName!: string;
   public isObserver: boolean = false;
   public user!: Voter;
   public votedOption: string | null = null;
+  public users: User[] = [];
   public voters: Voter[] = [];
   public observers: User[] = [];
   public pokeList: {id: string, position: number}[] = [];
   public currentIssue!: Issue | null;
   public options: string[] = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "☕"];
   public pokeControl: { [key: string]: { count: string, unsubscribe: any } } = {};
+  private votersUnsubscribe: any = null;
+  private issueUnsubscribe: any = null;
   @ViewChildren('voterCardList') voterCardList!: QueryList<VoterCardComponent>;
 
   constructor(
@@ -70,8 +74,16 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   }
 
   setVotersListener() {
-    onValue(ref(this.database, `plannings/${this.planningId}/voters/`), snapshot => {
+    this.votersUnsubscribe = onValue(ref(this.database, `plannings/${this.planningId}/voters/`), snapshot => {
       const users = Object.values(snapshot.val()) as User[];
+      this.user = users.find(u => u.uid === this.user?.uid) as Voter;
+      this.users = users;
+
+      if (users.some(u => u.uid === this.user?.uid) === false) {
+        this.leavePlanning();
+        return;
+      }
+
       this.voters = users.filter((u: any) => u.online && !u.observer) as Voter[];
       this.observers = users.filter((u: any) => u.online && u.observer) as User[];
 
@@ -106,7 +118,7 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   }
 
   setCurrentIssueListener() {
-    onValue(ref(this.database, `plannings/${this.planningId}/issue`), async snapshot => {
+    this.issueUnsubscribe = onValue(ref(this.database, `plannings/${this.planningId}/issue`), async snapshot => {
       const issueId = snapshot.val() as string;
       this.currentIssue = issueId ? (await getDoc(doc(this.firestore, 'issues', issueId))).data() as Issue : null;
       if (this.currentIssue?.description) {
@@ -202,11 +214,11 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
     return Math.round(sum / numbers.filter(n => n !== 0).length);
   }
 
-  public onPoke(voterId: string) {
-    if (voterId !== this.user.uid) {
-      set(ref(this.database, `plannings/${this.planningId}/pokes/${voterId}/`), {
-        count: Math.random().toFixed(5),
-        emoji: '💩'
+  public onPoke(event: VoterPokeEvent) {
+    const { voter, emoji } = event;
+    if (voter.uid !== this.user.uid) {
+      set(ref(this.database, `plannings/${this.planningId}/pokes/${voter.uid}/`), {
+        count: Math.random().toFixed(5), emoji
       });
     }
   }
@@ -240,6 +252,52 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
     this.isObserver = this.user.observer;
     localStorage.setItem('userData', JSON.stringify(this.user));
   }
+
+  public toggleConfigurations() {
+    this.showConfigDialog = !this.showConfigDialog;
+  }
+
+  public kickOutUser(user: User) {
+    if (user.uid !== this.user.uid) {
+      set(ref(this.database, `plannings/${this.planningId}/voters/${user.uid}`), null);
+      this.toastService.showMessage(`${user.name} foi desconectado.`);
+    }
+  }
+
+  public onLeavePlanning() {
+    confirm('Tem certeza que deseja sair da planning?') && this.leavePlanning();
+  }
+
+  private leavePlanning() {
+    this.cleanupListenersAndData();
+    this.router.navigateByUrl('/');
+  }
+
+  public cleanupListenersAndData() {
+    if (this.votersUnsubscribe) {
+      this.votersUnsubscribe();
+      this.votersUnsubscribe = null;
+    }
+    if (this.issueUnsubscribe) {
+      this.issueUnsubscribe();
+      this.issueUnsubscribe = null;
+    }
+
+    Object.values(this.pokeControl).forEach(ctrl => {
+      if (ctrl.unsubscribe) {
+        ctrl.unsubscribe();
+      }
+    });
+
+    this.pokeControl = {};
+    this.users = [];
+    this.voters = [];
+    this.observers = [];
+    this.pokeList = [];
+    this.currentIssue = null;
+    this.votedOption = null;
+  }
+
 }
 
 export interface User {
@@ -247,6 +305,7 @@ export interface User {
   name: string
   online?: boolean
   observer?: boolean
+  admin?: boolean
 }
 
 export interface Voter extends User {
