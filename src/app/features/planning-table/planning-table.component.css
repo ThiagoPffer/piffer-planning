@@ -103,15 +103,6 @@ ul {
     }
 }
 
-info-panel {
-    display: flex;
-    flex-direction: row;
-    min-width: 25%;
-    height: auto;
-    max-height: 100%;
-    overflow: hidden;
-}
-
 /* Fundo semi-transparente */
 .modal-overlay {
     position: fixed;
