@@ -14,15 +14,15 @@ export class IdValidatorGuard {
     ) {}
 
     async canActivate(route: any): Promise<boolean> {
-        const id = route.paramMap.get('id');
-        const exists = await this.fisebaseService.exists(`plannings/${id}`);
-        if (exists) {
-            // ID is valid, proceed to the route
-            return true;
-        }
-        // ID is invalid, redirect to the planning list
-        this.router.navigate(['/']);
-        return false;
+        // const id = route.paramMap.get('id');
+        // const exists = await this.fisebaseService.exists(`plannings/${id}`);
+        // if (exists) {
+        //     // ID is valid, proceed to the route
+        //     return true;
+        // }
+        // // ID is invalid, redirect to the planning list
+        // this.router.navigate(['/']);
+        return true;
     }
 }
 

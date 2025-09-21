@@ -53,6 +53,12 @@ export class EmojiComponent implements OnInit, OnDestroy {
 
 }
 
+export interface Poke {
+  voterId: string
+  emoji: string
+  timestamp: number
+}
+
 export interface CardPosition {
   top: number
   left: number

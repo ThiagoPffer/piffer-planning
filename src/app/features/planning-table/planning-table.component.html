@@ -28,7 +28,7 @@
                     }"></span>
                     {{ u.name }}
                 </div>
-                <button class="icon-button" (click)="kickOutUser(u)" *ngIf="u.uid !== user.uid" title="Expulsar usuário">
+                <button class="icon-button" (click)="kickOutUser(u)" *ngIf="u.id !== user.id" title="Expulsar usuário">
                     <span class="mdi mdi-trash-can-outline"></span>
                 </button>
             </li>
@@ -79,7 +79,7 @@
         </div>
         <div class="voter-card-list">
             <voter-card 
-                id="{{voter.uid}}"
+                id="{{voter.id}}"
                 [voter]="voter" 
                 [user]="user"
                 [votingFinished]="!!currentIssue?.averageVoting"

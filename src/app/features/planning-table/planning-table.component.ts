@@ -7,9 +7,12 @@ import { get, getDatabase, onValue, ref, set, update } from 'firebase/database';
 import { doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
 import { environment } from '../../../environments/environment';
 import { InfoPanelComponent } from "../../components/info-panel/info-panel.component";
-import { EmojiComponent } from "../../components/voter-card/emoji/emoji.component";
+import { EmojiComponent, Poke } from "../../components/voter-card/emoji/emoji.component";
 import { VoterCardComponent, VoterPokeEvent } from "../../components/voter-card/voter-card.component";
 import { ToastService } from '../../core/toast.service';
+import { WebsocketService } from '../../services/websocket.service';
+import { EnumMessageType } from './../../services/websocket.service';
+import { UserService } from '../../services/user.service';
 
 
 @Component({
@@ -46,7 +49,6 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   public pokeList: {id: string, position: number}[] = [];
   public currentIssue!: Issue | null;
   public options: string[] = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "☕"];
-  public pokeControl: { [key: string]: { count: string, unsubscribe: any } } = {};
   private votersUnsubscribe: any = null;
   private issueUnsubscribe: any = null;
   @ViewChildren('voterCardList') voterCardList!: QueryList<VoterCardComponent>;
@@ -54,15 +56,42 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private viewContainerRef: ViewContainerRef,
-    private toastService: ToastService
-  ) {}
+    private toastService: ToastService,
+    private websocketService: WebsocketService,
+    private userService: UserService
+  ) {
+    this.connectWebsocket();
+  }
 
   ngOnInit(): void {
+    console.log('ngOnInit');
     this.planningId = this.router.url.split('/')[1];
-    this.loadPlanningData();
+
+
     this.loadUserData();
-    this.setVotersListener();
-    this.setCurrentIssueListener();
+    this.loadPlanningData();
+    // this.setVotersListener();
+    // this.setCurrentIssueListener();
+  }
+
+  connectWebsocket() {
+    this.websocketService
+      .connectSocket(
+        'http://localhost:8080/ws', 
+        '/topic/room/' + this.planningId + '/update',
+        () => this.enterRoom(this.planningId, this.user.id)
+      ).subscribe(message => {
+        console.log('Received message:', message);
+
+        if (message.messageType == EnumMessageType.POKE) {
+          const poke = message.content as Poke;
+          this.poked(poke.voterId, poke);
+        }
+
+        if (message.messageType === EnumMessageType.VOTE) {
+          
+        }
+      });
   }
 
   loadPlanningData() {
@@ -76,10 +105,10 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   setVotersListener() {
     this.votersUnsubscribe = onValue(ref(this.database, `plannings/${this.planningId}/voters/`), snapshot => {
       const users = Object.values(snapshot.val()) as User[];
-      this.user = users.find(u => u.uid === this.user?.uid) as Voter;
+      this.user = users.find(u => u.id === this.user?.id) as Voter;
       this.users = users;
 
-      if (users.some(u => u.uid === this.user?.uid) === false) {
+      if (users.some(u => u.id === this.user?.id) === false) {
         this.leavePlanning();
         return;
       }
@@ -90,31 +119,7 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
       if (this.voters.every(v => v.votedOption) && !this.currentIssue?.averageVoting) {
         this.finishVoting();
       }
-
-      this.voters.forEach(v => {
-        if (v.online) {
-          this.setPokesListener(v);
-        }
-        if (!v.online && this.pokeControl[v.uid]?.unsubscribe) {
-          this.pokeControl[v.uid]?.unsubscribe();
-        }
-      });
     });
-  }
-
-  setPokesListener(voter: Voter) {
-    if (!this.pokeControl[voter.uid]) {
-      this.pokeControl[voter.uid] = {} as { count: string, unsubscribe: any };
-      this.pokeControl[voter.uid].unsubscribe = onValue(ref(this.database, `plannings/${this.planningId}/pokes/${voter.uid}`), snapshot => {
-        const poke = snapshot.val() as any;
-  
-        if (this.pokeControl[voter.uid].count !== poke?.count) {
-          this.poked(voter.uid, poke);
-        }
-  
-        this.pokeControl[voter.uid].count = poke?.count || '0';
-      });
-    }
   }
 
   setCurrentIssueListener() {
@@ -129,8 +134,8 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.user?.uid) {
-      update(ref(this.database, `plannings/${this.planningId}/voters/${this.user.uid}`), { online: false });
+    if (this.user?.id) {
+      update(ref(this.database, `plannings/${this.planningId}/voters/${this.user.id}`), { online: false });
     }
   }
 
@@ -155,7 +160,12 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
       return;
     }
     this.user = userData;
-    update(ref(this.database, `plannings/${this.planningId}/voters/${this.user.uid}`), {...userData, online: true});
+    this.isObserver = userData.observer || false;
+  }
+
+  private enterRoom(planningId: string, userId: String) {
+    console.log('Entering room', planningId, userId);
+    this.websocketService.sendMessage(`/app/room/${planningId}/enter`, userId);
   }
 
   public onIssuesLoaded(issues: Issue[]) {
@@ -164,8 +174,9 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
 
   public saveUser() {
     if (this.userName) {
-      this.user = { name: this.userName, uid: crypto.randomUUID(), observer: this.isObserver };
-      set(ref(this.database, `plannings/${this.planningId}/voters/${this.user.uid}`), {...this.user, online: true});
+      // revisar
+      this.user = { name: this.userName, id: crypto.randomUUID(), observer: this.isObserver };
+      set(ref(this.database, `plannings/${this.planningId}/voters/${this.user.id}`), {...this.user, online: true});
       localStorage.setItem('userData', JSON.stringify(this.user));
       this.showNameDialog = false;
     }
@@ -177,7 +188,9 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
     }
 
     this.votedOption = option;
-    set(ref(this.database, `plannings/${this.planningId}/voters/` + this.user.uid + '/votedOption'), option);
+    // set(ref(this.database, `plannings/${this.planningId}/voters/` + this.user.id + '/votedOption'), option);
+    this.websocketService
+      .sendMessage(`/app/room/${this.planningId}/vote/${this.user.id}`, option || '');
   }
 
   public onReset(issue: Issue) {
@@ -191,11 +204,11 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
       issue,
       voters: this.voters.reduce((v: any, voter: Voter) => {
         voter.votedOption = null;
-        v[voter.uid] = voter;
+        v[voter.id] = voter;
         return v;
       }, {
         ...this.observers.reduce((o: any, observer: User) => {
-          o[observer.uid] = observer
+          o[observer.id] = observer
           return o;
         }, {})
       })
@@ -205,7 +218,8 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   public onStartVoting(issue: Issue) {
     this.votedOption = null;
     this.resetVotes(issue.id);
-    updateDoc(doc(this.firestore, 'issues', issue.id), { status: EnumIssueStatus.VOTANDO });
+    // updateDoc(doc(this.firestore, 'issues', issue.id), { status: EnumIssueStatus.VOTANDO });
+    this.websocketService.sendMessage(`/app/room/${this.planningId}/start-voting`, issue.id);    
   }
 
   private calculateAverage(numbers: number[]) {
@@ -216,24 +230,24 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
 
   public onPoke(event: VoterPokeEvent) {
     const { voter, emoji } = event;
-    if (voter.uid !== this.user.uid) {
-      set(ref(this.database, `plannings/${this.planningId}/pokes/${voter.uid}/`), {
-        count: Math.random().toFixed(5), emoji
-      });
-    }
+    this.websocketService
+      .sendMessage(
+        `/app/room/${this.planningId}/poke/${voter.id}`, 
+        emoji
+      );
   }
 
-  public poked(voterId: string, poke: any) {
-    const voterCard = this.voterCardList?.toArray().find(c => c.voter.uid === voterId);
+  public poked(voterId: string, poke: Poke) {
+    const voterCard = this.voterCardList?.toArray().find(c => c.voter.id === voterId);
     const voterCardPosition = voterCard?.cardElement.nativeElement.getBoundingClientRect();
     if (voterCardPosition) {
       const component = this.viewContainerRef.createComponent(EmojiComponent);
       component.setInput('initialTop', 0);
-      component.setInput('initialLeft', ((Number(poke.count)*100000) % 2 === 0 ? 0 : window.screen.width));
+      component.setInput('initialLeft', (Number(poke.timestamp) % 2 === 0 ? 0 : window.screen.width));
       component.setInput('hitTop', voterCardPosition.top-30);
       component.setInput('hitLeft', voterCardPosition.left+25);
       component.setInput('finalLeft', voterCardPosition.left+Math.round(Math.random()*100));
-      component.setInput('emoji', poke.emoji);
+      component.setInput('emoji', poke.emoji.replace(/"/g, ''));
       setTimeout(() => component.destroy(), 2400);
     }
   }
@@ -248,7 +262,7 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
 
   public toggleObserver() {
     this.user.observer = !this.user.observer;
-    update(ref(this.database, `plannings/${this.planningId}/voters/${this.user.uid}`), { observer: this.user.observer });
+    update(ref(this.database, `plannings/${this.planningId}/voters/${this.user.id}`), { observer: this.user.observer });
     this.isObserver = this.user.observer;
     localStorage.setItem('userData', JSON.stringify(this.user));
   }
@@ -258,8 +272,8 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
   }
 
   public kickOutUser(user: User) {
-    if (user.uid !== this.user.uid) {
-      set(ref(this.database, `plannings/${this.planningId}/voters/${user.uid}`), null);
+    if (user.id !== this.user.id) {
+      set(ref(this.database, `plannings/${this.planningId}/voters/${user.id}`), null);
       this.toastService.showMessage(`${user.name} foi desconectado.`);
     }
   }
@@ -283,13 +297,6 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
       this.issueUnsubscribe = null;
     }
 
-    Object.values(this.pokeControl).forEach(ctrl => {
-      if (ctrl.unsubscribe) {
-        ctrl.unsubscribe();
-      }
-    });
-
-    this.pokeControl = {};
     this.users = [];
     this.voters = [];
     this.observers = [];
@@ -301,8 +308,9 @@ export class PlanningTableComponent implements OnInit, OnDestroy {
 }
 
 export interface User {
-  uid: string
+  id: string
   name: string
+  email?: string
   online?: boolean
   observer?: boolean
   admin?: boolean

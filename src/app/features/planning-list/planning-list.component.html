@@ -8,13 +8,17 @@
 
 <section class="user-name-section" *ngIf="started && !userData">
     <div class="panel">
-        <h3>Comece inserindo seu nome</h3>
+        <h3>Comece inserindo seu nome e email</h3>
         <div class="panel-content">
             <div class="input-group">
                 <label for="room-name">Nome</label>
                 <input type="text" id="room-name" [(ngModel)]="userName">
             </div>
-            <button class="default-button" [disabled]="!userName" (click)="saveUser(userName)">Avançar</button>
+            <div class="input-group">
+                <label for="room-email">Email</label>
+                <input type="text" id="room-email" [(ngModel)]="userEmail">
+            </div>
+            <button class="default-button" [disabled]="!userName" (click)="saveUser(userName, userEmail)">Avançar</button>
         </div>
     </div>
 </section>
@@ -30,7 +34,7 @@
                 <label for="room-name">Nome da sala</label>
                 <input type="text" id="room-name" [(ngModel)]="roomName">
             </div>
-            <button class="default-button" [disabled]="!roomName" (click)="createRoom(roomName)">Criar</button>
+            <button class="default-button" [disabled]="!roomName" (click)="createRoom(roomName || '')">Criar</button>
         </div>
     </div>
     <div class="panel">

@@ -13,7 +13,7 @@
     <span class="voter-name">
         {{ voter.name }}
     </span>
-    <div class="emoji-selection-menu" *ngIf="user.uid !== voter.uid && showEmojiMenu">
+    <div class="emoji-selection-menu" *ngIf="user.id !== voter.id && showEmojiMenu">
         <button class="icon-button" (click)="onPoke('🥐')">
             <span>🥐</span>
         </button>
